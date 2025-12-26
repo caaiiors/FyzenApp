@@ -1032,12 +1032,30 @@ export default function PlanScreen() {
 async function handleRegenerarDia(novoDia) {
   if (!novoDia || !Array.isArray(novoDia) || !plan?.treinos) return;
 
+  // nomes de grupos já usados na semana inteira (exceto o dia atual)
+  const gruposExistentes = new Set(
+    (plan.treinos || [])
+      .filter((g, idx) => {
+        const dia = DIAS[idx % DIAS.length];
+        return dia !== diaSelecionado; // ignora o dia sendo regenerado
+      })
+      .map((g) => (g?.grupo || "").toLowerCase())
+  );
+
+  // filtra grupos novos que não colidem com os já existentes
+  const novoDiaFiltrado = novoDia.filter(
+    (g) => !gruposExistentes.has((g?.grupo || "").toLowerCase())
+  );
+
+  // se filtrou tudo por algum motivo, mantém o original para não ficar vazio
+  const gruposAplicar = novoDiaFiltrado.length ? novoDiaFiltrado : novoDia;
+
   const novoTreinos = [...plan.treinos];
 
   treinosDoDia.forEach((g, idx) => {
     const globalIndex = g._globalIndex;
-    if (globalIndex != null && novoDia[idx]) {
-      novoTreinos[globalIndex] = novoDia[idx];
+    if (globalIndex != null && gruposAplicar[idx]) {
+      novoTreinos[globalIndex] = gruposAplicar[idx];
     }
   });
 
@@ -1051,6 +1069,7 @@ async function handleRegenerarDia(novoDia) {
     );
   }
 }
+
 
 
 async function handleRegenerarSemana(flatTreinos) {

@@ -29,7 +29,7 @@ export default function PremiumPage({
         "Relatório semanal",
         "Análise muscular",
         "Trocar exercícios",
-        "Coach Fyzen IA",
+        "Gerar treinos com IA",
         "Plano alimentar completo",
         "Treinos ilimitados",
       ],
@@ -50,7 +50,7 @@ export default function PremiumPage({
       ],
       bloqueados: [
         "Análise avançada ULTRA",
-        "Coach IA Turbo",
+        "Treinos com IA",
         "Insights de musculatura",
       ],
       destaque: true,
@@ -66,7 +66,7 @@ export default function PremiumPage({
       beneficios: [
         "Tudo do PRO",
         "Painel Ultra completo",
-        "Coach ULTRA — análise avançada",
+        "Treinos com IA ilimitados",
         "Volume por grupo muscular",
         "Insights semanais completos",
       ],
