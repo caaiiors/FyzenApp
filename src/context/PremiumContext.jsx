@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "../lib/firebaseConfig";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot, getDoc } from "firebase/firestore";
 
 const PremiumContext = createContext({
   nivel: "free",
@@ -13,10 +13,23 @@ export function PremiumProvider({ children }) {
   const [nivel, setNivel] = useState("free");
 
   useEffect(() => {
-    const unsub = auth.onAuthStateChanged((user) => {
+    const unsub = auth.onAuthStateChanged(async (user) => {
       if (!user) {
         setNivel("free");
         return;
+      }
+
+      // 🔥 Checa primeiro o users/{uid}.plan
+      try {
+        const userSnap = await getDoc(doc(db, "users", user.uid));
+        const userPlan = userSnap.exists() ? userSnap.data().plan : "free";
+
+        if (userPlan === "ultra") {
+          setNivel("ultra");
+          // continua ouvindo assinaturas só para caso deseje rebaixar depois
+        }
+      } catch (e) {
+        console.warn("Erro ao ler users plan:", e);
       }
 
       const ref = doc(db, "assinaturas", user.uid);
@@ -25,22 +38,27 @@ export function PremiumProvider({ children }) {
         const data = snap.data();
 
         if (!data || !data.ativo) {
-          setNivel("free");
+          // se users.plan já é ultra, mantém ultra; senão free
+          setNivel((prev) => (prev === "ultra" ? "ultra" : "free"));
           return;
         }
 
-        // ✅ VALIDA EXPIRAÇÃO IGUAL AO subscriptionEngine
         const agora = Date.now();
-        const naoExpirado = typeof data.renovaEm !== "number" || data.renovaEm > agora;
+        const naoExpirado =
+          typeof data.renovaEm !== "number" || data.renovaEm > agora;
 
         if (!naoExpirado) {
           console.warn("⚠️ Plano expirado detectado no PremiumContext");
-          setNivel("free");
+          setNivel((prev) => (prev === "ultra" ? "ultra" : "free"));
           return;
         }
 
-        const plano = String(data.plano || "free").toLowerCase();
-        setNivel(plano);
+        const planoAssinatura = String(data.plano || "free").toLowerCase();
+
+        // se o users.plan for ultra, mantemos ultra mesmo que assinatura diga free
+        setNivel((prev) =>
+          prev === "ultra" ? "ultra" : planoAssinatura
+        );
       });
 
       return () => unsubSub();
