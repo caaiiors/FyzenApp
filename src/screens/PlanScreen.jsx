@@ -18,6 +18,8 @@ import FormWizard from "@/components/FormWizard";
 const diasSemana = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
 const DIAS = ["segunda", "terça", "quarta", "quinta", "sexta"];
 
+const API_URL = import.meta.env.VITE_AI_WORKOUT_API_URL || "https://fyzenbackend.onrender.com/api";
+
 function getDiaSemanaAtual() {
   return diasSemana[new Date().getDay()];
 }
@@ -581,47 +583,37 @@ export default function PlanScreen() {
 
     const analise = { imc: imc.toFixed(1), classificacao, gasto };
 
-    let planoTreino;
+let planoTreino = [];
 
-    if (isUltra) {
-      setIaOverlayText("Gerando com IA (Ultra), aguarde...");
-      setIaOverlayOpen(true);
-      try {
-        const semana = await gerarPlanoSemanaIA(formData);
-        planoTreino = Array.isArray(semana)
-          ? semana
-              .flatMap((d) => {
-                if (!d || !Array.isArray(d.grupos)) return [];
-                return d.grupos;
-              })
-              .map((g) => {
-                let exercicios = [];
-                if (Array.isArray(g?.exercicios)) {
-                  exercicios = g.exercicios;
-                } else if (typeof g?.exercicios === "string") {
-                  exercicios = [g.exercicios];
-                }
-                return {
-                  grupo: g?.grupo || "Grupo sem nome",
-                  exercicios: exercicios,
-                };
-              })
-              .filter((g) => g.exercicios.length > 0)
-          : [];
+if (isUltra) {
+  setIaOverlayText("Gerando com IA Ultra, aguarde...");
+  setIaOverlayOpen(true);
+  
+  try {
+    const respostaIA = await fetch(`${API_URL}/workout/week`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ form: formData })
+    });
 
-        if (!planoTreino.length) {
-          console.warn("⚠️ IA retornou vazio, usando método tradicional");
-          planoTreino = gerarPlanoTreino(formData.objetivo, formData.local, formData);
-        }
-      } catch (err) {
-        console.error("❌ Erro ao gerar com IA:", err);
-        planoTreino = gerarPlanoTreino(formData.objetivo, formData.local, formData);
-      } finally {
-        setIaOverlayOpen(false);
-      }
+    const dataIA = await respostaIA.json().catch(() => ({}));
+
+    if (respostaIA.ok && dataIA.treinos && Array.isArray(dataIA.treinos)) {
+      planoTreino = dataIA.treinos;
+      console.log("[Plan] IA retornou treinos:", planoTreino);
     } else {
+      console.warn("[Plan] IA falhou, usando método tradicional");
       planoTreino = gerarPlanoTreino(formData.objetivo, formData.local, formData);
     }
+  } catch (err) {
+    console.error("[Plan] Erro ao chamar IA:", err);
+    planoTreino = gerarPlanoTreino(formData.objetivo, formData.local, formData);
+  } finally {
+    setIaOverlayOpen(false);
+  }
+} else {
+  planoTreino = gerarPlanoTreino(formData.objetivo, formData.local, formData);
+}
 
     const calorias =
       formData.objetivo === "emagrecimento"
@@ -1032,22 +1024,21 @@ export default function PlanScreen() {
 async function handleRegenerarDia(novoDia) {
   if (!novoDia || !Array.isArray(novoDia) || !plan?.treinos) return;
 
-  // nomes de grupos já usados na semana inteira (exceto o dia atual)
+  // nomes de grupos já usados na semana (exceto o dia atual)
   const gruposExistentes = new Set(
     (plan.treinos || [])
       .filter((g, idx) => {
         const dia = DIAS[idx % DIAS.length];
-        return dia !== diaSelecionado; // ignora o dia sendo regenerado
+        return dia !== diaSelecionado;
       })
       .map((g) => (g?.grupo || "").toLowerCase())
   );
 
-  // filtra grupos novos que não colidem com os já existentes
+  // remove grupos que já existem em outros dias
   const novoDiaFiltrado = novoDia.filter(
     (g) => !gruposExistentes.has((g?.grupo || "").toLowerCase())
   );
 
-  // se filtrou tudo por algum motivo, mantém o original para não ficar vazio
   const gruposAplicar = novoDiaFiltrado.length ? novoDiaFiltrado : novoDia;
 
   const novoTreinos = [...plan.treinos];
@@ -1061,6 +1052,7 @@ async function handleRegenerarDia(novoDia) {
 
   const novoPlan = { ...plan, treinos: novoTreinos };
   setPlan(novoPlan);
+
   if (user) {
     await setDoc(
       doc(db, "planos", user.uid),
@@ -1069,6 +1061,7 @@ async function handleRegenerarDia(novoDia) {
     );
   }
 }
+
 
 
 
@@ -1185,14 +1178,15 @@ async function handleRegenerarSemana(flatTreinos) {
 </button>
 
   <div className="flex-1 flex flex-col gap-3 sm:flex-row sm:gap-3">
-    {isUltra && plan?.treinos && treinosDoDia.length > 0 && (
-      <RegenerateDayButton
-        form={form}
-        diaSelecionado={diaSelecionado}
-        dayData={treinosDoDia}
-        onRegenerated={handleRegenerarDia}
-      />
-    )}
+{isUltra && plan?.treinos && treinosDoDia.length > 0 && (
+  <RegenerateDayButton
+    form={form}
+    diaSelecionado={diaSelecionado}
+    dayData={treinosDoDia}
+    onRegenerated={handleRegenerarDia}
+  />
+)}
+
 
 
     {isUltra && plan?.treinos && (
