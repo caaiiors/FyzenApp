@@ -6,6 +6,7 @@ import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import WorkoutChecklist from "@/components/WorkoutChecklist";
 import WeeklyInsightsModal from "@/components/premium/WeeklyInsightsModal";
 import { gerarWeeklyInsights } from "@/lib/premium/weeklyInsights";
+import RegenerateDayButton from "@/components/premium/RegenerateDayButton";
 import RegenerateWeekButton from "@/components/premium/RegenerateWeekButton";
 import EditGroupModal from "@/components/premium/EditGroupModal";
 import { usePremium } from "@/context/PremiumContext";
@@ -62,6 +63,8 @@ export default function PlanScreen() {
 
   const { nivel, isPro, isUltra } = usePremium();
   const diaAtual = getDiaSemanaAtual();
+
+    console.log("plan screen debug", { isUltra, plan });
 
   // ========== MEMOS ==========
   const treinosPorDiaMemo = useMemo(() => {
@@ -1028,6 +1031,47 @@ export default function PlanScreen() {
     );
   }
 
+  async function handleRegenerarDia(novosGrupos) {
+    if (!novosGrupos || !Array.isArray(novosGrupos) || !plan?.treinos) return;
+
+    const novoTreinos = [...plan.treinos];
+
+    treinosDoDia.forEach((g, idx) => {
+      const globalIndex = g._globalIndex;
+      if (globalIndex != null && novosGrupos[idx]) {
+        novoTreinos[globalIndex] = novosGrupos[idx];
+      }
+    });
+
+    const novoPlan = { ...plan, treinos: novoTreinos };
+    setPlan(novoPlan);
+    if (user) {
+      await setDoc(
+        doc(db, "planos", user.uid),
+        { plan: novoPlan },
+        { merge: true }
+      );
+    }
+  }
+
+async function handleRegenerarSemana(flatTreinos) {
+  if (!flatTreinos || !Array.isArray(flatTreinos)) return;
+
+  const novoPlan = { ...plan, treinos: flatTreinos };
+  setPlan(novoPlan);
+  if (user) {
+    await setDoc(
+      doc(db, "planos", user.uid),
+      { plan: novoPlan },
+      { merge: true }
+    );
+  }
+}
+
+
+
+
+
   return (
     <>
       {/* Overlay IA */}
@@ -1087,48 +1131,72 @@ export default function PlanScreen() {
 />
 
 
-      {/* WIZARD OU VISUALIZAÇÃO DO PLANO */}
-      {!plan ? (
-        <Container className="py-8">
-          <div className="mb-8 text-center">
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
-              Crie seu Plano de Treino Personalizado
-            </h1>
-            <p className="text-slate-400 max-w-2xl mx-auto">
-              Responda algumas perguntas e gere um treino adaptado aos seus objetivos
-            </p>
-          </div>
+      {!plan || isEditingForm ? (
+  <Container className="py-8">
+    <div className="mb-8 text-center">
+      <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
+        Crie seu Plano de Treino Personalizado
+      </h1>
+      <p className="text-slate-400 max-w-2xl mx-auto">
+        Responda algumas perguntas e gere um treino adaptado aos seus objetivos
+      </p>
+    </div>
 
-          <FormWizard steps={wizardSteps} initialData={form} onComplete={handleGenerate} loading={saving} />
-        </Container>
-      ) : (
-        <Container className="py-8 space-y-6">
+    <FormWizard
+      steps={wizardSteps}
+      initialData={form}
+      onComplete={handleGenerate}
+      loading={saving}
+      onCancel={() => setIsEditingForm(false)} // se o componente aceitar
+    />
+  </Container>
+) : (
+  <Container className="py-8 space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Seu Plano de Treino</h1>
               {statusMsg && <p className="text-sm text-primary-300">{statusMsg}</p>}
             </div>
+<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+<button
+  onClick={() => setIsEditingForm(true)}
+  className="h-11 px-4 rounded-xl bg-slate-800/70 hover:bg-slate-700 text-slate-100 text-sm font-medium flex items-center justify-center gap-2 transition"
+>
+  ✏️ Editar Dados
+</button>
 
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => {
-                  setPlan(null);
-                  setAnalysis(null);
-                }}
-                className="btn-secondary text-sm"
-              >
-                ✏️ Editar Dados
-              </button>
+  <div className="flex-1 flex flex-col gap-3 sm:flex-row sm:gap-3">
+    {isUltra && plan?.treinos && treinosDoDia.length > 0 && (
+      <RegenerateDayButton
+        dia={diaSelecionado}
+        grupos={treinosDoDia}
+        onRegenerar={handleRegenerarDia}
+      />
+    )}
 
-              {isUltra && <RegenerateWeekButton onClick={handleRegenerateWeek} loading={saving} />}
+    {isUltra && plan?.treinos && (
+      <RegenerateWeekButton
+        nivel={nivel}
+        isUltra={isUltra}
+        form={form}
+        onRegenerated={handleRegenerarSemana}
+      />
+    )}
 
-              {weeklyInsights && (
-                <button onClick={() => setOpenInsights(true)} className="btn-primary text-sm">
-                  📊 Ver Insights
-                </button>
-              )}
-            </div>
+    {weeklyInsights && (
+      <button
+        onClick={() => setOpenInsights(true)}
+        className="h-11 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium flex items-center justify-center gap-2 transition"
+      >
+        📊 Ver Insights
+      </button>
+    )}
+  </div>
+</div>
+
+
+
           </div>
 
           {/* Análise */}
