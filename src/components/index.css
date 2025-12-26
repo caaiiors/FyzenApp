@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ——— GLASS EFFECTS ——— */
+.glass-card {
+  @apply bg-slate-900/40 border border-white/10 backdrop-blur-2xl rounded-2xl;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.glass-card-elevated {
+  @apply glass-card;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.glass-pill {
+  @apply rounded-full bg-white/5 border border-white/10 backdrop-blur-xl;
+}
+
+/* ——— INPUTS ——— */
+.input-style {
+  @apply w-full bg-slate-900/65 border border-white/10 text-slate-100 px-4 py-3 rounded-xl outline-none text-sm transition-all;
+}
+
+.input-style:focus {
+  @apply border-primary-400/50 bg-slate-900/80 ring-2 ring-primary-400/20;
+}
+
+/* ——— BUTTONS ——— */
+.btn-primary {
+  @apply bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold px-6 py-3 rounded-xl transition-all hover:shadow-glow-teal hover:scale-105 active:scale-95;
+}
+
+.btn-secondary {
+  @apply bg-slate-800/80 text-slate-200 font-semibold px-6 py-3 rounded-xl border border-white/10 transition-all hover:bg-slate-700/80 hover:border-white/20;
+}
+
+.btn-ultra {
+  @apply bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold px-6 py-3 rounded-xl transition-all hover:shadow-glow-purple hover:scale-105 active:scale-95;
+}
+
+/* ——— SCROLLBAR ——— */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.custom-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ——— BACKGROUND GRADIENTS ——— */
+.bg-fitmind {
+  background: linear-gradient(110deg, #07285c 0%, #0e4960 45%, #2c9a83 85%);
+}
+
+.bg-gradient-dark {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+}
+
+/* ——— ANIMATIONS ——— */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.skeleton {
+  @apply bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-[length:200%_100%] animate-pulse rounded;
+}
+
+/* ——— UTILITIES ——— */
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-400 to-primary-600;
+}
+
+.text-gradient-purple {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400;
+}
