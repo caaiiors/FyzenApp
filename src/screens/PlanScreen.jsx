@@ -1291,60 +1291,101 @@ async function handleRegenerarSemana(flatTreinos) {
   </div>
 </div>
 
-{/* Treinos do Dia - COM ATRIBUTO data-treino-section */}
-<div data-treino-section className="space-y-4">
-  {bloqueado ? (
-    <div className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl">
-      <p className="text-orange-300 text-sm">{mensagem}</p>
-    </div>
-  ) : (
-    <>
-      {treinosDoDia.length === 0 ? (
-        <div className="glass-card p-8 text-center">
-          <p className="text-slate-400">Nenhum treino para este dia</p>
+{/* Treinos de TODOS os dias */}
+<div data-treino-section className="space-y-6">
+  {DIAS.map((dia) => {
+    // Verificar se o dia passou ou é futuro
+    const indexAtual = diasSemana.indexOf(diaAtual);
+    const indexDia = diasSemana.indexOf(dia);
+    
+    let bloqueadoDia = false;
+    let mensagemDia = "";
+    
+    if (indexDia < indexAtual) {
+      bloqueadoDia = true;
+      mensagemDia = `Você já passou o dia de ${dia}.`;
+    } else if (indexDia > indexAtual) {
+      bloqueadoDia = true;
+      mensagemDia = `Hoje é ${diaAtual}. Volte em ${dia} para completar este treino.`;
+    }
+
+    // Pega os treinos deste dia específico
+    const treinosDia = treinosPorDiaMemo[dia] || [];
+
+    return (
+      <motion.div
+        key={dia}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: DIAS.indexOf(dia) * 0.1 }}
+        className={`rounded-2xl border transition-all ${
+          bloqueadoDia
+            ? "border-slate-700/50 bg-slate-900/30 opacity-60"
+            : "border-white/10 bg-slate-900/50"
+        }`}
+      >
+        {/* Header do dia */}
+        <div className="p-4 border-b border-white/10 flex items-center justify-between">
+          <h3 className="text-lg font-bold text-white capitalize">
+            {dia.charAt(0).toUpperCase() + dia.slice(1)}
+          </h3>
+          {bloqueadoDia && (
+            <span className="text-xs text-slate-500 italic">{mensagemDia}</span>
+          )}
         </div>
-      ) : (
-        treinosDoDia.map((treino, idx) => (
-          <motion.div
-            key={idx}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.1 }}
-            className="glass-card p-6"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Dumbbell className="w-5 h-5 text-primary-400" />
-                {treino.grupo || "Grupo sem nome"}
-              </h3>
-              {isPro && (
-                <button
-                  onClick={() => setEditingGroup(treino)}
-                  className="text-sm px-3 py-1 rounded-lg bg-primary-500/10 text-primary-300 hover:bg-primary-500/20 transition-all"
-                >
-                  Editar
-                </button>
-              )}
-            </div>
 
-            <WorkoutChecklist
-              treino={treino.exercicios}
-              dia={diaSelecionado}
-              grupo={treino.grupo}
-              bloqueado={bloqueado}
-            />
+        {/* Treinos deste dia */}
+        <div className="p-4 space-y-4">
+          {treinosDia.length === 0 ? (
+            <p className="text-slate-400 text-sm text-center py-4">
+              Nenhum treino para este dia
+            </p>
+          ) : (
+            treinosDia.map((treino, idx) => (
+              <div
+                key={idx}
+                className={`rounded-xl p-4 transition-all ${
+                  bloqueadoDia
+                    ? "bg-slate-800/30"
+                    : "bg-slate-800/50 hover:bg-slate-800/70"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-slate-100 flex items-center gap-2">
+                    <Dumbbell className="w-4 h-4 text-primary-400" />
+                    {treino.grupo || "Grupo sem nome"}
+                  </h4>
+                  {!bloqueadoDia && isPro && (
+                    <button
+                      onClick={() => setEditingGroup(treino)}
+                      className="text-xs px-2 py-1 rounded-lg bg-primary-500/10 text-primary-300 hover:bg-primary-500/20 transition-all"
+                    >
+                      Editar
+                    </button>
+                  )}
+                </div>
 
-            {!isPro && (
-              <p className="text-xs text-slate-500 mt-4">
-                Personalização de grupo disponível no plano Pro.
-              </p>
-            )}
-          </motion.div>
-        ))
-      )}
-    </>
-  )}
+                <WorkoutChecklist
+                  treino={treino.exercicios}
+                  dia={dia}
+                  grupo={treino.grupo}
+                  bloqueado={bloqueadoDia}
+                />
+
+                {!isPro && !bloqueadoDia && (
+                  <p className="text-xs text-slate-500 mt-3">
+                    Personalização de grupo disponível no plano Pro.
+                  </p>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      </motion.div>
+    );
+  })}
 </div>
+
 
         </Container>
       )}
