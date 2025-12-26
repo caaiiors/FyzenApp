@@ -1,11 +1,11 @@
-# 💪 FitMind — App Inteligente de Treinos e Alimentação
+# 💪 Fyzen — App Inteligente de Treinos e Alimentação
 
 ![React](https://img.shields.io/badge/React-18.0.0-blue?logo=react)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.3-blueviolet?logo=tailwindcss)
 ![Firebase](https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-orange?logo=firebase)
 ![Framer Motion](https://img.shields.io/badge/Framer%20Motion-Animations-pink?logo=framer)
 
-> 🧠 **FitMind** é uma plataforma moderna que gera **planos de treino e nutrição personalizados** com base nos dados do usuário, conectada à nuvem via Firebase.  
+> 🧠 **Fyzen** é uma plataforma moderna que gera **planos de treino e nutrição personalizados** com base nos dados do usuário, conectada à nuvem via Firebase.  
 > Tudo é salvo automaticamente, e o app entrega uma experiência interativa, responsiva e com animações suaves — pronto para ser lançado.
 
 ---
