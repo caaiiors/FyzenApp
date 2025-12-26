@@ -1,6 +1,6 @@
 // src/lib/stripeService.js
 const BACKEND_URL =
-  import.meta.env.VITE_AI_SERVER_URL || "http://localhost:3001";
+  import.meta.env.VITE_AI_SERVER_URL || "https://fyzenbackend.onrender.com";
 
 export async function iniciarCheckoutStripe({ priceId, uid, email, plano }) {
   console.log("🚀 ========================================");
