@@ -1,7 +1,7 @@
 import React from "react";
 import StripeCheckoutButton from "../components/premium/StripeCheckoutButton.jsx";
 
-const PRICE_ID_PRO = "price_1SdDk5Rw5LzzuwFsY91tjPeB";
+const PRICE_ID_PRO = "price_1Scqen2LPaSfKXCC1IJ9q3XO";
 
 export default function CheckoutProPage() {
   return (
