@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_AI_WORKOUT_API_URL;
+const API_URL =
+  import.meta.env.VITE_AI_WORKOUT_API_URL ||
+  "https://fyzenbackend.onrender.com/api";
 
 // --------- GERAR SEMANA COMPLETA ----------
 export async function gerarPlanoSemanaIA(form) {
@@ -14,7 +16,10 @@ export async function gerarPlanoSemanaIA(form) {
     console.log("📩 IA /workout/week status:", res.status);
     console.log("📩 IA /workout/week payload:", data);
 
-    if (!res.ok) throw new Error(data.error || "Erro ao gerar plano semanal via IA");
+    if (!res.ok)
+      throw new Error(
+        data.error || "Erro ao gerar plano semanal via IA"
+      );
 
     // backend retorna { treinosSemana: [...] }
     return data.treinosSemana || null;
@@ -38,7 +43,8 @@ export async function regenerarDiaIA(form, dia, gruposAtuais) {
     console.log("📩 IA /workout/day status:", res.status);
     console.log("📩 IA /workout/day payload:", data);
 
-    if (!res.ok) throw new Error(data.error || "Erro ao regenerar dia via IA");
+    if (!res.ok)
+      throw new Error(data.error || "Erro ao regenerar dia via IA");
 
     // backend retorna { grupos: [...] }
     return data.grupos || null;
