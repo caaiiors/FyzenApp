@@ -64,8 +64,6 @@ export default function PlanScreen() {
   const { nivel, isPro, isUltra } = usePremium();
   const diaAtual = getDiaSemanaAtual();
 
-    console.log("plan screen debug", { isUltra, plan });
-
   // ========== MEMOS ==========
   const treinosPorDiaMemo = useMemo(() => {
     if (!plan?.treinos) return {};
@@ -1031,28 +1029,29 @@ export default function PlanScreen() {
     );
   }
 
-  async function handleRegenerarDia(novosGrupos) {
-    if (!novosGrupos || !Array.isArray(novosGrupos) || !plan?.treinos) return;
+async function handleRegenerarDia(novoDia) {
+  if (!novoDia || !Array.isArray(novoDia) || !plan?.treinos) return;
 
-    const novoTreinos = [...plan.treinos];
+  const novoTreinos = [...plan.treinos];
 
-    treinosDoDia.forEach((g, idx) => {
-      const globalIndex = g._globalIndex;
-      if (globalIndex != null && novosGrupos[idx]) {
-        novoTreinos[globalIndex] = novosGrupos[idx];
-      }
-    });
-
-    const novoPlan = { ...plan, treinos: novoTreinos };
-    setPlan(novoPlan);
-    if (user) {
-      await setDoc(
-        doc(db, "planos", user.uid),
-        { plan: novoPlan },
-        { merge: true }
-      );
+  treinosDoDia.forEach((g, idx) => {
+    const globalIndex = g._globalIndex;
+    if (globalIndex != null && novoDia[idx]) {
+      novoTreinos[globalIndex] = novoDia[idx];
     }
+  });
+
+  const novoPlan = { ...plan, treinos: novoTreinos };
+  setPlan(novoPlan);
+  if (user) {
+    await setDoc(
+      doc(db, "planos", user.uid),
+      { plan: novoPlan },
+      { merge: true }
+    );
   }
+}
+
 
 async function handleRegenerarSemana(flatTreinos) {
   if (!flatTreinos || !Array.isArray(flatTreinos)) return;
@@ -1169,11 +1168,13 @@ async function handleRegenerarSemana(flatTreinos) {
   <div className="flex-1 flex flex-col gap-3 sm:flex-row sm:gap-3">
     {isUltra && plan?.treinos && treinosDoDia.length > 0 && (
       <RegenerateDayButton
-        dia={diaSelecionado}
-        grupos={treinosDoDia}
-        onRegenerar={handleRegenerarDia}
+        form={form}
+        diaSelecionado={diaSelecionado}
+        dayData={treinosDoDia}
+        onRegenerated={handleRegenerarDia}
       />
     )}
+
 
     {isUltra && plan?.treinos && (
       <RegenerateWeekButton
