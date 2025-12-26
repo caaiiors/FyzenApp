@@ -550,102 +550,129 @@ export default function PlanScreen() {
     });
   };
 
-  const handleGenerate = async (formData) => {
-    if (!user) return alert("Faça login para gerar seu plano.");
+async function handleGenerate(formData) {
+  if (!user) return alert("Faça login para gerar seu plano.");
 
-    setForm(formData);
+  setForm(formData);
 
-    const peso = parseFloat(formData.peso);
-    const alturaCm = parseFloat(formData.altura);
-    const idade = parseFloat(formData.idade);
+  const peso = parseFloat(formData.peso);
+  const alturaCm = parseFloat(formData.altura);
+  const idade = parseFloat(formData.idade);
 
-    if (!peso || !alturaCm || !idade) {
-      return alert("Altura, peso e idade inválidos.");
-    }
-
-    const altura = alturaCm / 100;
-    const imc = peso / (altura * altura);
-    let classificacao = "";
-    if (imc < 18.5) classificacao = "Abaixo do peso";
-    else if (imc < 25) classificacao = "Peso normal";
-    else if (imc < 30) classificacao = "Sobrepeso";
-    else classificacao = "Obesidade";
-
-    const tmb =
-      formData.sexo === "feminino"
-        ? 655 + 9.6 * peso + 1.8 * alturaCm - 4.7 * idade
-        : 66 + 13.7 * peso + 5 * alturaCm - 6.8 * idade;
-
-    let fator = 1.2;
-    if (formData.nivel === "intermediario") fator = 1.5;
-    if (formData.nivel === "avancado") fator = 1.8;
-    const gasto = Math.round(tmb * fator);
-
-    const analise = { imc: imc.toFixed(1), classificacao, gasto };
-
-let planoTreino = [];
-
-if (isUltra) {
-  setIaOverlayText("Gerando com IA Ultra, aguarde...");
-  setIaOverlayOpen(true);
-  
-  try {
-    const respostaIA = await fetch(`${API_URL}/workout/week`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ form: formData })
-    });
-
-    const dataIA = await respostaIA.json().catch(() => ({}));
-
-    if (respostaIA.ok && dataIA.treinos && Array.isArray(dataIA.treinos)) {
-      planoTreino = dataIA.treinos;
-      console.log("[Plan] IA retornou treinos:", planoTreino);
-    } else {
-      console.warn("[Plan] IA falhou, usando método tradicional");
-      planoTreino = gerarPlanoTreino(formData.objetivo, formData.local, formData);
-    }
-  } catch (err) {
-    console.error("[Plan] Erro ao chamar IA:", err);
-    planoTreino = gerarPlanoTreino(formData.objetivo, formData.local, formData);
-  } finally {
-    setIaOverlayOpen(false);
+  if (!peso || !alturaCm || !idade) {
+    return alert("Altura, peso e idade inválidos.");
   }
-} else {
-  planoTreino = gerarPlanoTreino(formData.objetivo, formData.local, formData);
+
+  const altura = alturaCm / 100;
+  const imc = peso / (altura * altura);
+
+  let classificacao;
+  if (imc < 18.5) classificacao = "Abaixo do peso";
+  else if (imc < 25) classificacao = "Peso normal";
+  else if (imc < 30) classificacao = "Sobrepeso";
+  else classificacao = "Obesidade";
+
+  const tmb =
+    formData.sexo === "feminino"
+      ? 655 + 9.6 * peso + 1.8 * alturaCm - 4.7 * idade
+      : 66 + 13.7 * peso + 5 * alturaCm - 6.8 * idade;
+
+  let fator = 1.2;
+  if (formData.nivel === "intermediario") fator = 1.5;
+  if (formData.nivel === "avancado") fator = 1.8;
+
+  const gasto = Math.round(tmb * fator);
+  const analise = { imc: imc.toFixed(1), classificacao, gasto };
+
+  let planoTreino = [];
+
+  if (isUltra) {
+    setIaOverlayText("Gerando com IA Ultra, aguarde...");
+    setIaOverlayOpen(true);
+
+    try {
+      const respostaIA = await fetch(`${API_URL}/workout/week`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ form: formData })
+      });
+
+      const dataIA = await respostaIA.json().catch(() => ({}));
+
+      if (respostaIA.ok && dataIA.treinos && Array.isArray(dataIA.treinos)) {
+        planoTreino = dataIA.treinos;
+        console.log("[Plan] IA retornou treinos:", planoTreino);
+      } else {
+        console.warn("[Plan] IA falhou, usando método tradicional");
+        planoTreino = gerarPlanoTreino(
+          formData.objetivo,
+          formData.local,
+          formData
+        );
+      }
+    } catch (err) {
+      console.error("[Plan] Erro ao chamar IA:", err);
+      planoTreino = gerarPlanoTreino(
+        formData.objetivo,
+        formData.local,
+        formData
+      );
+    } finally {
+      setIaOverlayOpen(false);
+    }
+  } else {
+    planoTreino = gerarPlanoTreino(formData.objetivo, formData.local, formData);
+  }
+
+  const calorias =
+    formData.objetivo === "emagrecimento"
+      ? analise.gasto - 400
+      : formData.objetivo === "hipertrofia"
+      ? analise.gasto + 400
+      : analise.gasto;
+
+  const dados = {
+    form: formData,
+    analysis: analise,
+    plan: { info: formData, treinos: planoTreino },
+    nutrition: { total: calorias, plano: "" },
+    ownerUid: user.uid,
+    updatedAt: serverTimestamp()
+  };
+
+  setSaving(true);
+
+  try {
+    setAnalysis(analise);
+    setPlan(dados.plan);
+    setNutrition(dados.nutrition);
+
+    await salvarPlano(user.uid, dados);
+    setStatusMsg("Plano gerado e salvo!");
+    setDiaSelecionado("segunda");
+    setIsEditingForm(false);
+
+    // ===== ADICIONAR ISTO - SCROLL AUTOMÁTICO =====
+    setTimeout(() => {
+      // Faz scroll suave até a seção de treinos
+      const treinoSection = document.querySelector('[data-treino-section]');
+      if (treinoSection) {
+        treinoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        // Fallback: scroll manual se o elemento não estiver presente
+        window.scrollTo({ top: 800, behavior: 'smooth' });
+      }
+    }, 500);
+    // ===== FIM DO SCROLL =====
+
+  } catch (err) {
+    console.error("Erro ao gerar/salvar plano:", err);
+    setStatusMsg("Erro ao gerar seu plano.");
+  } finally {
+    setSaving(false);
+  }
 }
 
-    const calorias =
-      formData.objetivo === "emagrecimento"
-        ? analise.gasto - 400
-        : formData.objetivo === "hipertrofia"
-        ? analise.gasto + 400
-        : analise.gasto;
-
-    const dados = {
-      form: formData,
-      analysis: analise,
-      plan: { info: formData, treinos: planoTreino },
-      nutrition: { total: calorias, plano: [] },
-      ownerUid: user.uid,
-      updatedAt: serverTimestamp(),
-    };
-
-    setSaving(true);
-    try {
-      setAnalysis(analise);
-      setPlan(dados.plan);
-      setNutrition(dados.nutrition);
-      await salvarPlano(user.uid, dados);
-      setStatusMsg("Plano gerado e salvo!");
-      setDiaSelecionado("segunda");
-    } catch (err) {
-      console.error("Erro ao gerar/salvar plano:", err);
-      setStatusMsg("Erro ao gerar seu plano.");
-    } finally {
-      setSaving(false);
-    }
-  };
 
   async function handleRegenerateWeek() {
     try {
@@ -1245,78 +1272,80 @@ async function handleRegenerarSemana(flatTreinos) {
             </div>
           )}
 
-          {/* Seletor de Dias */}
-          <div className="glass-card p-4">
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-              {DIAS.map((dia) => (
+{/* Seletor de Dias */}
+<div className="glass-card p-4">
+  <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+    {DIAS.map((dia) => (
+      <button
+        key={dia}
+        onClick={() => setDiaSelecionado(dia)}
+        className={`px-4 py-2 rounded-xl font-medium text-sm whitespace-nowrap transition-all ${
+          diaSelecionado === dia
+            ? "bg-primary-500 text-white"
+            : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/50"
+        }`}
+      >
+        {dia.charAt(0).toUpperCase() + dia.slice(1)}
+      </button>
+    ))}
+  </div>
+</div>
+
+{/* Treinos do Dia - COM ATRIBUTO data-treino-section */}
+<div data-treino-section className="space-y-4">
+  {bloqueado ? (
+    <div className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl">
+      <p className="text-orange-300 text-sm">{mensagem}</p>
+    </div>
+  ) : (
+    <>
+      {treinosDoDia.length === 0 ? (
+        <div className="glass-card p-8 text-center">
+          <p className="text-slate-400">Nenhum treino para este dia</p>
+        </div>
+      ) : (
+        treinosDoDia.map((treino, idx) => (
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.1 }}
+            className="glass-card p-6"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Dumbbell className="w-5 h-5 text-primary-400" />
+                {treino.grupo || "Grupo sem nome"}
+              </h3>
+              {isPro && (
                 <button
-                  key={dia}
-                  onClick={() => setDiaSelecionado(dia)}
-                  className={`px-4 py-2 rounded-xl font-medium text-sm whitespace-nowrap transition-all ${
-                    diaSelecionado === dia
-                      ? "bg-primary-500 text-white"
-                      : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/50"
-                  }`}
+                  onClick={() => setEditingGroup(treino)}
+                  className="text-sm px-3 py-1 rounded-lg bg-primary-500/10 text-primary-300 hover:bg-primary-500/20 transition-all"
                 >
-                  {dia.charAt(0).toUpperCase() + dia.slice(1)}
+                  Editar
                 </button>
-              ))}
+              )}
             </div>
-          </div>
 
-          {/* Treinos do Dia */}
-          {bloqueado && (
-            <div className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl">
-              <p className="text-orange-300 text-sm">⚠️ {mensagem}</p>
-            </div>
-          )}
+            <WorkoutChecklist
+              treino={treino.exercicios}
+              dia={diaSelecionado}
+              grupo={treino.grupo}
+              bloqueado={bloqueado}
+            />
 
-          <div className="space-y-4">
-            {treinosDoDia.length === 0 ? (
-              <div className="glass-card p-8 text-center">
-                <p className="text-slate-400">Nenhum treino para este dia 🤷‍♂️</p>
-              </div>
-            ) : (
-              treinosDoDia.map((treino, idx) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  className="glass-card p-6"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                      <Dumbbell className="w-5 h-5 text-primary-400" />
-                      {treino.grupo || "Grupo sem nome"}
-                    </h3>
-
-                    {isPro && (
-                      <button
-                        onClick={() => setEditingGroup(treino)}
-                        className="text-sm px-3 py-1 rounded-lg bg-primary-500/10 text-primary-300 hover:bg-primary-500/20 transition-all"
-                      >
-                        ✏️ Editar
-                      </button>
-                    )}
-                  </div>
-
-                  <WorkoutChecklist
-                    treino={treino.exercicios || []}
-                    dia={diaSelecionado}
-                    grupo={treino.grupo}
-                    bloqueado={bloqueado}
-                  />
-
-                  {!isPro && (
-                    <p className="text-xs text-slate-500 mt-4">
-                      ✨ Personalização de grupo disponível no plano Pro.
-                    </p>
-                  )}
-                </motion.div>
-              ))
+            {!isPro && (
+              <p className="text-xs text-slate-500 mt-4">
+                Personalização de grupo disponível no plano Pro.
+              </p>
             )}
-          </div>
+          </motion.div>
+        ))
+      )}
+    </>
+  )}
+</div>
+
         </Container>
       )}
     </>
