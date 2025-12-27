@@ -17,7 +17,7 @@ import { usePlanDocument } from "../lib/hooks/usePlanDocument.js";
 import { useAdminAnalytics } from "../lib/hooks/useAdminAnalytics.js";
 import { useAdminWeeklyAnalytics } from "../lib/hooks/useAdminWeeklyAnalytics.js";
 import { db } from "../lib/firebaseConfig";
-import { collection, serverTimestamp, addDoc, getDocs, doc, getDoc, setDoc, query } from "firebase/firestore";
+import { collection, serverTimestamp, addDoc, getDocs, doc, getDoc, setDoc, query, where, } from "firebase/firestore";
 import Container from "../components/Container.jsx";
 
 
