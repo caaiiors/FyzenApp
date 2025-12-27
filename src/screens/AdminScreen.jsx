@@ -32,6 +32,11 @@ export default function AdminScreen({ user, isAdmin }) {
   const [sendingNotif, setSendingNotif] = useState(false);
   const [notifMsg, setNotifMsg] = useState("");
   const [logs, setLogs] = useState([]);
+  const [gerenciarTab, setGerenciarTab] = useState("alterar");
+  const [gerenciarEmail, setGerenciarEmail] = useState("");
+  const [gerenciarPlano, setGerenciarPlano] = useState("free");
+  const [gerenciarMsg, setGerenciarMsg] = useState("");
+  const [gerenciarLoading, setGerenciarLoading] = useState(false);
 
 async function corrigirAssinaturas() {
   if (!window.confirm("Corrigir documentos quebrados da coleção 'assinaturas'?")) {
@@ -260,6 +265,8 @@ function PremiumUsersList() {
     </Container>
   );
 }
+
+
 
 
   return (
@@ -632,14 +639,192 @@ function PremiumUsersList() {
               ))}
             </div>
           )}
-
-          <button
-            onClick={corrigirAssinaturas}
-            className="px-4 py-2 rounded-lg bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 hover:bg-yellow-500/30 transition"
-          >
-            Corrigir assinaturas quebradas
-          </button>
     </div>
+    <Card titleGerenciar planos de usuários classNamebg-slate-90080 iconSparkles>
+  <div className="space-y-6">
+    {/* TAB: Alterar ou Remover */}
+    <div className="flex gap-2 mb-4">
+      <button
+        typebutton
+        onClick={() => setGerenciarTab("alterar")}
+        className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+          gerenciarTab === "alterar"
+            ? "bg-teal-500 text-white"
+            : "bg-slate-800 text-slate-400 hover:text-slate-200"
+        }`}
+      >
+        Alterar Plano
+      </button>
+      <button
+        typebutton
+        onClick={() => setGerenciarTab("remover")}
+        className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+          gerenciarTab === "remover"
+            ? "bg-red-500 text-white"
+            : "bg-slate-800 text-slate-400 hover:text-slate-200"
+        }`}
+      >
+        Remover Plano
+      </button>
+    </div>
+
+    {/* ALTERAR PLANO */}
+    {gerenciarTab === "alterar" && (
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          setGerenciarMsg("");
+
+          if (!gerenciarEmail.trim() || !gerenciarPlano.trim()) {
+            setGerenciarMsg("❌ Preencha email e plano.");
+            return;
+          }
+
+          try {
+            setGerenciarLoading(true);
+
+            const usersSnap = await getDocs(
+              query(collection(db, "users"), where("email", "==", gerenciarEmail.trim()))
+            );
+
+            if (usersSnap.empty) {
+              setGerenciarMsg("❌ Usuário não encontrado.");
+              setGerenciarLoading(false);
+              return;
+            }
+
+            const uid = usersSnap.docs[0].id;
+
+            await setDoc(
+              doc(db, "assinaturas", uid),
+              {
+                plano: gerenciarPlano.toLowerCase(),
+                ativo: true,
+                metodo: "admin-override",
+                criadoEm: new Date(),
+                renovaEm: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                ultimaVerificacao: new Date(),
+              },
+              { merge: true }
+            );
+
+            setGerenciarMsg(`✅ ${gerenciarEmail} → ${gerenciarPlano.toUpperCase()}`);
+            setGerenciarEmail("");
+            setGerenciarPlano("free");
+            setGerenciarLoading(false);
+          } catch (err) {
+            console.error(err);
+            setGerenciarMsg(`❌ Erro: ${err.message}`);
+            setGerenciarLoading(false);
+          }
+        }}
+        className="space-y-3"
+      >
+        <input
+          type="email"
+          value={gerenciarEmail}
+          onChange={(e) => setGerenciarEmail(e.target.value)}
+          placeholder="Email do usuário"
+          className="w-full px-3 py-2 rounded-2xl bg-slate-95070 border border-white10 text-sm text-slate-100 outline-none focus:ring-1 focus:ring-teal-400"
+        />
+
+        <select
+          value={gerenciarPlano}
+          onChange={(e) => setGerenciarPlano(e.target.value)}
+          className="w-full px-3 py-2 rounded-2xl bg-slate-95070 border border-white10 text-sm text-slate-100 outline-none focus:ring-1 focus:ring-teal-400"
+        >
+          <option value="free">Free</option>
+          <option value="pro">Pro</option>
+          <option value="ultra">Ultra</option>
+        </select>
+
+        <button
+          type="submit"
+          disabled={gerenciarLoading}
+          className="w-full px-4 py-2 rounded-2xl text-sm font-medium flex items-center justify-center gap-2 transition bg-gradient-to-r from-teal-300 to-emerald-300 text-slate-900 hover:brightness-105 disabled:opacity-50"
+        >
+          {gerenciarLoading ? "Alterando..." : "Alterar Plano"}
+        </button>
+
+        {gerenciarMsg && <p className="text-xs text-slate-300">{gerenciarMsg}</p>}
+      </form>
+    )}
+
+    {/* REMOVER PLANO */}
+    {gerenciarTab === "remover" && (
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          setGerenciarMsg("");
+
+          if (!gerenciarEmail.trim()) {
+            setGerenciarMsg("❌ Preencha o email.");
+            return;
+          }
+
+          if (!window.confirm(`Remover plano de ${gerenciarEmail}?`)) {
+            return;
+          }
+
+          try {
+            setGerenciarLoading(true);
+
+            const usersSnap = await getDocs(
+              query(collection(db, "users"), where("email", "==", gerenciarEmail.trim()))
+            );
+
+            if (usersSnap.empty) {
+              setGerenciarMsg("❌ Usuário não encontrado.");
+              setGerenciarLoading(false);
+              return;
+            }
+
+            const uid = usersSnap.docs[0].id;
+
+            await setDoc(
+              doc(db, "assinaturas", uid),
+              {
+                plano: "free",
+                ativo: false,
+                metodo: "admin-removal",
+                canceladoEm: new Date(),
+                ultimaVerificacao: new Date(),
+              },
+              { merge: true }
+            );
+
+            setGerenciarMsg(`✅ Plano de ${gerenciarEmail} removido (FREE)`);
+            setGerenciarEmail("");
+            setGerenciarLoading(false);
+          } catch (err) {
+            console.error(err);
+            setGerenciarMsg(`❌ Erro: ${err.message}`);
+            setGerenciarLoading(false);
+          }
+        }}
+        className="space-y-3"
+      >
+        <input
+          type="email"
+          value={gerenciarEmail}
+          onChange={(e) => setGerenciarEmail(e.target.value)}
+          placeholder="Email do usuário"
+          className="w-full px-3 py-2 rounded-2xl bg-slate-95070 border border-white10 text-sm text-slate-100 outline-none focus:ring-1 focus:ring-teal-400"
+        />
+
+        <button
+          type="submit"
+          disabled={gerenciarLoading}
+          className="w-full px-4 py-2 rounded-2xl text-sm font-medium flex items-center justify-center gap-2 transition bg-gradient-to-r from-red-500 to-pink-500 text-white hover:brightness-105 disabled:opacity-50"
+        >
+          {gerenciarLoading ? "Removendo..." : "Remover Plano"}
+        </button>
+
+        {gerenciarMsg && <p className="text-xs text-slate-300">{gerenciarMsg}</p>}
+      </form>
+    )}
+  </div>
+</Card>
     </Container>
   );
 }
