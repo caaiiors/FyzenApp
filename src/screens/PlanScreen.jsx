@@ -652,18 +652,7 @@ async function handleGenerate(formData) {
     setDiaSelecionado("segunda");
     setIsEditingForm(false);
 
-    // ===== ADICIONAR ISTO - SCROLL AUTOMÁTICO =====
-    setTimeout(() => {
-      // Faz scroll suave até a seção de treinos
-      const treinoSection = document.querySelector('[data-treino-section]');
-      if (treinoSection) {
-        treinoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else {
-        // Fallback: scroll manual se o elemento não estiver presente
-        window.scrollTo({ top: 800, behavior: 'smooth' });
-      }
-    }, 500);
-    // ===== FIM DO SCROLL =====
+    setIaOverlayOpen(false);
 
   } catch (err) {
     console.error("Erro ao gerar/salvar plano:", err);
