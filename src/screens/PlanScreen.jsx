@@ -704,6 +704,85 @@ async function handleGenerate(formData) {
     }
   }
 
+  // ✅ ADICIONAR ESTA FUNÇÃO no PlanScreen.jsx (depois da função handleRegenerateWeek)
+async function handleGenerateCompletePlan() {
+  try {
+    if (!user) return alert("Faça login.");
+    if (!isUltra) return alert("Disponível apenas no Ultra.");
+    
+    setSaving(true);
+    setStatusMsg("Gerando plano completo (Treino + Cardápio)...");
+    setIaOverlayText("Gerando plano completo com IA, aguarde...");
+    setIaOverlayOpen(true);
+
+    // ✅ Monta userData com os dados DO FORMULÁRIO
+    const userData = {
+      weight: parseFloat(form.peso),
+      height: parseFloat(form.altura),
+      age: parseFloat(form.idade),
+      sex: form.sexo === "feminino" ? "female" : "male",
+      activityLevel: form.nivel === "iniciante" ? "light" : 
+                     form.nivel === "intermediario" ? "moderate" : "active",
+      goal: form.objetivo === "emagrecimento" ? "weight_loss" :
+            form.objetivo === "hipertrofia" ? "muscle_gain" : "maintenance",
+      experience: form.nivel,
+    };
+
+    console.log("📦 Enviando userData:", userData);
+
+    const response = await fetch(`${API_URL}/plan/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: user.uid,
+        userData,
+        subscriptionPlan: "ultra"
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("❌ Erro do servidor:", errorText);
+      throw new Error(`Erro ${response.status}: ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log("✅ Plano completo recebido:", data);
+
+    if (data.success && data.data) {
+      // ✅ Atualiza APENAS o cardápio, mantém o treino
+      const planData = data.data;
+      
+      setPlan(planData.workout);
+      setNutrition(planData.meal);
+      setAnalysis(planData.nutrition);
+
+      // ✅ Salva no Firestore SEM apagar o treino
+      await setDoc(doc(db, "planos", user.uid), {
+        form,
+        plan: planData.workout,
+        meal: planData.meal,
+        nutrition: planData.nutrition,
+        analysis,
+        ownerUid: user.uid,
+        updatedAt: serverTimestamp()
+      }, { merge: true }); // ✅ merge: true NÃO apaga os outros campos
+
+      setStatusMsg("Plano completo gerado e salvo!");
+    } else {
+      throw new Error("Resposta inválida do servidor");
+    }
+  } catch (err) {
+    console.error("❌ Erro ao gerar plano completo:", err);
+    setStatusMsg("Erro ao gerar plano completo: " + err.message);
+    alert("Erro: " + err.message);
+  } finally {
+    setSaving(false);
+    setIaOverlayOpen(false);
+  }
+}
+
+
   // ========== COMPONENTES DAS ETAPAS ==========
   const Step1Personal = ({ data, updateField }) => (
     <div className="space-y-4">
@@ -1205,6 +1284,20 @@ async function handleRegenerarSemana(flatTreinos) {
         onRegenerated={handleRegenerarSemana}
       />
     )}
+
+{isUltra && plan?.treinos && (
+  <motion.button
+    onClick={handleGenerateCompletePlan}
+    disabled={saving}
+    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:opacity-90 transition disabled:opacity-50"
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+  >
+    <Apple className="w-4 h-4" />
+    Gerar Cardápio com IA
+  </motion.button>
+)}
+
 
     {weeklyInsights && (
       <button
