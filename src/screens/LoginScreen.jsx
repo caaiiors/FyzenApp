@@ -123,7 +123,6 @@ return (
       transition={{ duration: 0.5 }}
       className="w-full max-w-md"
     >
-      {/* Logo/Header */}
       <div className="text-center mb-8">
         <motion.div
           initial={{ scale: 0.8 }}
@@ -143,7 +142,6 @@ return (
         </p>
       </div>
 
-      {/* Card do formulário */}
       <Card elevated className="p-8">
         {error && (
           <motion.div
@@ -218,7 +216,6 @@ return (
           </Button>
         </form>
 
-        {/* Divider */}
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-white/10" />
@@ -230,7 +227,6 @@ return (
           </div>
         </div>
 
-        {/* Google Login */}
         <button
           onClick={loginWithGoogle}
           className="w-full bg-white hover:bg-slate-100 text-slate-900 font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-3 group"
@@ -244,7 +240,6 @@ return (
           Continuar com Google
         </button>
 
-        {/* Toggle */}
         <div className="mt-6 text-center text-sm text-slate-400">
           {isRegistering ? "Já tem uma conta?" : "Não tem uma conta?"}
           <button
@@ -260,7 +255,6 @@ return (
         </div>
       </Card>
 
-      {/* Footer */}
       <p className="mt-6 text-center text-xs text-slate-500">
         🔒 Suas informações são protegidas por criptografia de ponta a ponta
       </p>

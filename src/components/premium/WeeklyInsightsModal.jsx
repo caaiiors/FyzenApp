@@ -46,7 +46,6 @@ export default function WeeklyInsightsModal({ open, onClose, insights }) {
           exit={{ opacity: 0, scale: 0.9, y: 10 }}
           className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-slate-950/90 border border-white/10 shadow-xl shadow-black/50 p-5 sm:p-6 space-y-5"
         >
-          {/* Header */}
           <div className="flex items-start justify-between gap-3">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
@@ -77,7 +76,6 @@ export default function WeeklyInsightsModal({ open, onClose, insights }) {
             </button>
           </div>
 
-          {/* Cards de Resumo */}
           <div className="grid sm:grid-cols-3 gap-3">
             <ResumoCard
               icon={Activity}
@@ -106,7 +104,6 @@ export default function WeeklyInsightsModal({ open, onClose, insights }) {
             />
           </div>
 
-          {/* Progresso Geral */}
           {percentualGeral > 0 && (
             <div className="rounded-2xl bg-gradient-to-br from-teal-500/10 to-emerald-500/10 border border-teal-500/20 p-4">
               <div className="flex items-center justify-between mb-2">
@@ -132,7 +129,6 @@ export default function WeeklyInsightsModal({ open, onClose, insights }) {
             </div>
           )}
 
-          {/* Distribuição por Dia */}
           {porDia.length > 0 && (
             <div className="rounded-2xl bg-slate-900/70 border border-white/5 p-4 space-y-3">
               <p className="text-xs font-semibold text-slate-300 flex items-center gap-2">
@@ -182,7 +178,6 @@ export default function WeeklyInsightsModal({ open, onClose, insights }) {
             </div>
           )}
 
-          {/* Volume por Grupo */}
           <div className="rounded-2xl bg-slate-900/70 border border-white/5 p-4">
             <p className="text-xs font-semibold text-slate-300 flex items-center gap-2 mb-2">
               <Flame className="w-4 h-4 text-amber-300" />
@@ -211,7 +206,6 @@ export default function WeeklyInsightsModal({ open, onClose, insights }) {
             )}
           </div>
 
-          {/* Botão Fechar */}
           <button
             onClick={onClose}
             className="w-full mt-1 py-2 bg-slate-800/70 hover:bg-slate-700 text-slate-100 rounded-2xl text-sm transition"

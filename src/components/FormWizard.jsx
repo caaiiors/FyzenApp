@@ -33,9 +33,7 @@ export default function FormWizard({ steps, onComplete, initialData = {}, loadin
 
   return (
     <Card className="p-6 md:p-8">
-      {/* Progress Indicators */}
       <div className="mb-8">
-        {/* Step Numbers */}
         <div className="flex items-center justify-between mb-4">
           {steps.map((step, idx) => (
             <React.Fragment key={idx}>
@@ -71,7 +69,6 @@ export default function FormWizard({ steps, onComplete, initialData = {}, loadin
           ))}
         </div>
 
-        {/* Progress Bar */}
         <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
           <motion.div
             className="h-full bg-gradient-to-r from-primary-500 to-primary-400"
@@ -81,7 +78,6 @@ export default function FormWizard({ steps, onComplete, initialData = {}, loadin
           />
         </div>
 
-        {/* Title */}
         <div className="mt-4">
           <h3 className="text-xl md:text-2xl font-bold text-white">
             {steps[currentStep].title}
@@ -94,7 +90,6 @@ export default function FormWizard({ steps, onComplete, initialData = {}, loadin
         </div>
       </div>
 
-      {/* Step Content */}
       <AnimatePresence mode="wait">
         <motion.div
           key={currentStep}
@@ -110,7 +105,6 @@ export default function FormWizard({ steps, onComplete, initialData = {}, loadin
         </motion.div>
       </AnimatePresence>
 
-      {/* Navigation */}
       <div className="flex items-center justify-between mt-8 pt-6 border-t border-white/10">
         <button
           onClick={handleBack}

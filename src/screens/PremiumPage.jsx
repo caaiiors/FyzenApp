@@ -153,14 +153,12 @@ export default function PremiumPage({
 
   return (
     <Container className="py-12">
-      {/* 2️⃣ Fundo mais bonito com gradiente */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
       </div>
 
       <div className="relative z-10">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -178,7 +176,6 @@ export default function PremiumPage({
           </p>
         </motion.div>
 
-        {/* 1️⃣ Cards de Planos - LARGURA AUMENTADA */}
         <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {planos.map((plano, idx) => {
             const Icon = plano.icone;
@@ -199,7 +196,6 @@ export default function PremiumPage({
                     : "border-white/10 bg-slate-900/30"
                 } ${plano.destaque ? "transform md:scale-105" : ""}`}
               >
-                {/* Badge "Mais Popular" */}
                 {plano.destaque && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                     <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-teal-400 to-emerald-400 text-slate-900 shadow-lg">
@@ -208,7 +204,6 @@ export default function PremiumPage({
                   </div>
                 )}
 
-                {/* Ícone e Nome */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div
@@ -225,10 +220,8 @@ export default function PremiumPage({
                   {renderStatus(plano.nome)}
                 </div>
 
-                {/* Descrição */}
                 <p className="text-slate-400 text-sm mb-4">{plano.descricao}</p>
 
-                {/* Preço */}
                 {plano.preco !== "0" && (
                   <div className="mb-6">
                     <div className="flex items-baseline gap-1">
@@ -240,7 +233,6 @@ export default function PremiumPage({
                   </div>
                 )}
 
-                {/* Benefícios */}
                 <div className="space-y-3 mb-6">
                   <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
                     Inclui:
@@ -252,7 +244,6 @@ export default function PremiumPage({
                     </div>
                   ))}
 
-                  {/* Bloqueados */}
                   {plano.bloqueados.length > 0 && (
                     <>
                       <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mt-4">
@@ -268,7 +259,6 @@ export default function PremiumPage({
                   )}
                 </div>
 
-                {/* Botão */}
                 <button
                   onClick={() => handleSelectPlan(plano.nome)}
                   disabled={isDisabled}
@@ -287,7 +277,6 @@ export default function PremiumPage({
           })}
         </div>
 
-        {/* Footer */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

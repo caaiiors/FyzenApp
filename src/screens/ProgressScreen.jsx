@@ -142,7 +142,6 @@ export default function ProgressScreen() {
   return (
     <Container className="py-8">
       <div className="space-y-8">
-        {/* Header */}
         <motion.div {...fadeIn}>
           <h2 className="text-2xl font-bold text-slate-50 flex items-center gap-2">
             <BarChart2 className="w-6 h-6 text-teal-300" />
@@ -153,7 +152,6 @@ export default function ProgressScreen() {
           </p>
         </motion.div>
 
-        {/* Cards de Resumo */}
         <motion.div {...fadeIn} className="grid md:grid-cols-3 gap-4">
           <Card
             icon={CheckCircle}
@@ -180,7 +178,6 @@ export default function ProgressScreen() {
           />
         </motion.div>
 
-        {/* Gráfico Semanal */}
         <motion.div
           {...fadeIn}
           className="glass-card rounded-3xl p-6 border border-white/5"
@@ -228,7 +225,6 @@ export default function ProgressScreen() {
           </div>
         </motion.div>
 
-        {/* Heatmap de Consistência */}
         <motion.div
           {...fadeIn}
           className="glass-card rounded-3xl p-5 border border-white/5 space-y-3"

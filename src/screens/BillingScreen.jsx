@@ -148,7 +148,6 @@ const metodo =
           )}
         </div>
 
-{/* Caso 1: assinatura ativa e NÃO está agendada pra cancelar */}
 {!cancelado && !futuroCancelado && !expirado && (
   <div className="flex gap-4">
     <button
@@ -167,7 +166,6 @@ const metodo =
   </div>
 )}
 
-{/* Caso 2: renovação já foi cancelada (mas ainda tem acesso até a data) */}
 {!cancelado && futuroCancelado && !expirado && (
   <div className="flex gap-4">
     <button
@@ -192,7 +190,6 @@ const metodo =
   </div>
 )}
 
-{/* Caso 3: expirou (mas não está cancelada definitivamente) */}
 {expirado && !cancelado && (
   <button
     onClick={() => onSelectScreen("premium")}

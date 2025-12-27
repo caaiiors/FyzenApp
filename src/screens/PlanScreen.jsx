@@ -1095,13 +1095,8 @@ async function handleRegenerarSemana(flatTreinos) {
   }
 }
 
-
-
-
-
   return (
     <>
-      {/* Overlay IA */}
       {iaOverlayOpen && (
         <div className="fixed inset-0 z-[9999] bg-slate-950/95 backdrop-blur-md flex items-center justify-center">
           <div className="text-center p-8">
@@ -1116,7 +1111,6 @@ async function handleRegenerarSemana(flatTreinos) {
         </div>
       )}
 
-      {/* Modal Insights */}
       <WeeklyInsightsModal
         open={openInsights}
         onClose={() => setOpenInsights(false)}
@@ -1124,7 +1118,6 @@ async function handleRegenerarSemana(flatTreinos) {
         nivel={nivel}
       />
 
-      {/* Modal Edição */}
 <EditGroupModal
   open={!!editingGroup}
   onClose={() => setEditingGroup(null)}
@@ -1179,7 +1172,6 @@ async function handleRegenerarSemana(flatTreinos) {
   </Container>
 ) : (
   <Container className="py-8 space-y-6">
-          {/* Header */}
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Seu Plano de Treino</h1>
@@ -1229,7 +1221,6 @@ async function handleRegenerarSemana(flatTreinos) {
 
           </div>
 
-          {/* Análise */}
           {analysis && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <motion.div {...fadeIn} className="glass-card p-4">
@@ -1261,7 +1252,6 @@ async function handleRegenerarSemana(flatTreinos) {
             </div>
           )}
 
-{/* Seletor de Dias */}
 <div className="glass-card p-4">
   <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
     {DIAS.map((dia) => (
@@ -1280,7 +1270,6 @@ async function handleRegenerarSemana(flatTreinos) {
   </div>
 </div>
 
-{/* Treinos do dia ATUAL */}
 <div data-treino-section className="space-y-4">
   {bloqueado ? (
     <div className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl">
