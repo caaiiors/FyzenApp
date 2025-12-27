@@ -397,15 +397,6 @@ const gerarPlanoTeste = async () => {
   return (
     <Container>
       <div className="py-8 px-4 max-w-5xl mx-auto">
-        <motion.button
-  {...fadeIn}
-  onClick={gerarPlanoTeste}
-  disabled={gerando}
-  className="mb-4 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
->
-  <Sparkles className="w-4 h-4" />
-  {gerando ? "Gerando..." : "🧪 Gerar Plano Teste (Treino + Cardápio)"}
-</motion.button>
         {/* Título */}
         <motion.h1
           {...fadeIn}
