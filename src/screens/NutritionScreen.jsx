@@ -86,7 +86,7 @@ const gerarPlanoTeste = async () => {
   
   setGerando(true);
   try {
-    const response = await fetch('http://localhost:3001/api/plan/generate', {
+    const response = await fetch('https://fyzenbackend.onrender.com/api/plan/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
