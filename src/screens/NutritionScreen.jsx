@@ -26,6 +26,7 @@ export default function NutritionScreen() {
   const [metaCalorica, setMetaCalorica] = useState(0);
   const [diaSelecionado, setDiaSelecionado] = useState(hojeISO());
   const [refeicoes, setRefeicoes] = useState([]);
+  const [gerando, setGerando] = useState(false);
   const [totalConsumido, setTotalConsumido] = useState(0);
   const [novaRef, setNovaRef] = useState({
     nome: "",
@@ -55,17 +56,72 @@ export default function NutritionScreen() {
   }, [diaSelecionado, user]);
 
   // ✨ NOVO: Carregar cardápio gerado
-  const carregarMealPlan = async (uid) => {
-    try {
-      const ref = doc(db, "planos", uid);
-      const snap = await getDoc(ref);
-      if (snap.exists() && snap.data().meal) {
-        setMealPlan(snap.data().meal);
+// Dentro da função carregarMealPlan, adicione logs:
+const carregarMealPlan = async (uid) => {
+  try {
+    const ref = doc(db, "planos", uid);
+    const snap = await getDoc(ref);
+    
+    console.log("📦 Documento planos existe?", snap.exists());
+    
+    if (snap.exists()) {
+      const data = snap.data();
+      console.log("📦 Dados do plano:", data);
+      console.log("🍽️ Tem meal?", data.meal);
+      
+      if (data.meal) {
+        setMealPlan(data.meal);
+        console.log("✅ Cardápio carregado:", data.meal);
+      } else {
+        console.log("❌ Não há cardápio (meal) no documento");
       }
-    } catch (err) {
-      console.error("Erro ao carregar cardápio:", err);
     }
-  };
+  } catch (err) {
+    console.error("❌ Erro ao carregar cardápio:", err);
+  }
+};
+
+const gerarPlanoTeste = async () => {
+  if (!user) return;
+  
+  setGerando(true);
+  try {
+    const response = await fetch('http://localhost:3001/api/plan/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: user.uid,
+        userData: {
+          weight: 75,
+          height: 175,
+          age: 28,
+          sex: 'male',
+          activityLevel: 'moderate',
+          goal: 'muscle_gain',
+          experience: 'intermediate',
+          availableDays: 5,
+          equipment: ['dumbbells', 'barbell']
+        },
+        subscriptionPlan: 'ultra' // ou 'free'
+      })
+    });
+
+    const result = await response.json();
+    console.log("✅ Plano gerado:", result);
+    
+    if (result.success) {
+      showToast("Plano gerado com sucesso!");
+      await carregarMealPlan(user.uid);
+    } else {
+      showToast("Erro ao gerar plano");
+    }
+  } catch (error) {
+    console.error("❌ Erro:", error);
+    showToast("Erro ao gerar plano");
+  } finally {
+    setGerando(false);
+  }
+};
 
   const carregarMeta = async (uid) => {
     try {
@@ -341,6 +397,15 @@ export default function NutritionScreen() {
   return (
     <Container>
       <div className="py-8 px-4 max-w-5xl mx-auto">
+        <motion.button
+  {...fadeIn}
+  onClick={gerarPlanoTeste}
+  disabled={gerando}
+  className="mb-4 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+>
+  <Sparkles className="w-4 h-4" />
+  {gerando ? "Gerando..." : "🧪 Gerar Plano Teste (Treino + Cardápio)"}
+</motion.button>
         {/* Título */}
         <motion.h1
           {...fadeIn}
