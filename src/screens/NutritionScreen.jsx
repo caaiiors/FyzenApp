@@ -62,18 +62,13 @@ const carregarMealPlan = async (uid) => {
     const ref = doc(db, "planos", uid);
     const snap = await getDoc(ref);
     
-    console.log("📦 Documento planos existe?", snap.exists());
     
     if (snap.exists()) {
       const data = snap.data();
-      console.log("📦 Dados do plano:", data);
-      console.log("🍽️ Tem meal?", data.meal);
       
       if (data.meal) {
         setMealPlan(data.meal);
-        console.log("✅ Cardápio carregado:", data.meal);
       } else {
-        console.log("❌ Não há cardápio (meal) no documento");
       }
     }
   } catch (err) {
@@ -106,9 +101,7 @@ const gerarPlanoTeste = async () => {
       })
     });
 
-    const result = await response.json();
-    console.log("✅ Plano gerado:", result);
-    
+    const result = await response.json();    
     if (result.success) {
       showToast("Plano gerado com sucesso!");
       await carregarMealPlan(user.uid);

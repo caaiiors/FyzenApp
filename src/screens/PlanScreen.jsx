@@ -601,7 +601,6 @@ async function handleGenerate(formData) {
 
       if (respostaIA.ok && dataIA.treinos && Array.isArray(dataIA.treinos)) {
         planoTreino = dataIA.treinos;
-        console.log("[Plan] IA retornou treinos:", planoTreino);
       } else {
         console.warn("[Plan] IA falhou, usando método tradicional");
         planoTreino = gerarPlanoTreino(
@@ -728,7 +727,6 @@ async function handleGenerateCompletePlan() {
       experience: form.nivel,
     };
 
-    console.log("📦 Enviando userData:", userData);
 
     const response = await fetch(`${API_URL}/plan/generate`, {
       method: "POST",
@@ -747,7 +745,6 @@ async function handleGenerateCompletePlan() {
     }
 
     const data = await response.json();
-    console.log("✅ Plano completo recebido:", data);
 
     if (data.success && data.data) {
       // ✅ Atualiza APENAS o cardápio, mantém o treino
