@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Dumbbell, Activity, Apple, Flame } from "lucide-react";
+import { Dumbbell, Activity, Apple, Flame, BarChart2, Edit2, RefreshCw, Sparkles} from "lucide-react";
 import { auth, db } from "../lib/firebaseConfig";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import WorkoutChecklist from "@/components/WorkoutChecklist";
@@ -1249,67 +1249,118 @@ async function handleRegenerarSemana(flatTreinos) {
 ) : (
   <Container className="py-8 space-y-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Seu Plano de Treino</h1>
-              {statusMsg && <p className="text-sm text-primary-300">{statusMsg}</p>}
-            </div>
-<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-<button
-  onClick={() => setIsEditingForm(true)}
-  className="h-11 px-4 rounded-xl bg-slate-800/70 hover:bg-slate-700 text-slate-100 text-sm font-medium flex items-center justify-center gap-2 transition"
->
-  ✏️ Editar Dados
-</button>
-
-  <div className="flex-1 flex flex-col gap-3 sm:flex-row sm:gap-3">
-{isUltra && plan?.treinos && treinosDoDia.length > 0 && (
-  <RegenerateDayButton
-    form={form}
-    diaSelecionado={diaSelecionado}
-    dayData={treinosDoDia}
-    onRegenerated={handleRegenerarDia}
-  />
-)}
-
-
-
-    {isUltra && plan?.treinos && (
-      <RegenerateWeekButton
-        nivel={nivel}
-        isUltra={isUltra}
-        form={form}
-        onRegenerated={handleRegenerarSemana}
-      />
-    )}
-
-{isUltra && plan?.treinos && (
-  <motion.button
-    onClick={handleGenerateCompletePlan}
-    disabled={saving}
-    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:opacity-90 transition disabled:opacity-50"
-    whileHover={{ scale: 1.02 }}
-    whileTap={{ scale: 0.98 }}
-  >
-    <Apple className="w-4 h-4" />
-    Gerar Cardápio com IA
-  </motion.button>
-)}
-
-
-    {weeklyInsights && (
-      <button
-        onClick={() => setOpenInsights(true)}
-        className="h-11 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium flex items-center justify-center gap-2 transition"
-      >
-        📊 Ver Insights
-      </button>
-    )}
-  </div>
+{/* --- CABEÇALHO CENTRALIZADO (NOVO) --- */}
+<div className="flex flex-col items-center justify-center text-center w-full mb-8">
+  <h1 className="text-3xl md:text-3xl font-bold text-white mb-2 tracking-tight">
+    Seu Plano de Treino
+  </h1>
+  
+  {statusMsg ? (
+     <p className="text-sm text-emerald-400 font-medium animate-pulse">{statusMsg}</p>
+  ) : (
+    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-white/10 text-zinc-400 text-xs font-medium">
+      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]" />
+      <span>Sincronizado na nuvem</span>
+    </div>
+  )}
 </div>
 
 
+{/* --- TOOLBAR DE AÇÕES RÁPIDAS (Estilo iOS Otimizado) --- */}
+<div className="w-full bg-zinc-900/50 border border-white/5 rounded-3xl p-5 mb-8 backdrop-blur-sm shadow-xl shadow-black/20">
+  
+  {/* Header da Toolbar */}
+  <div className="flex items-center justify-between mb-5 px-1">
+    <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Ações Rápidas</h3>
+    {isUltra && (
+      <div className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-full">
+        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_5px_#10b981]" />
+        <span className="text-[10px] font-bold text-emerald-400">IA ATIVA</span>
+      </div>
+    )}
+  </div>
 
-          </div>
+  {/* Grid de Ícones (Centralizado e Expandido) */}
+  <div className="grid grid-cols-4 gap-4 sm:gap-6 justify-items-center">
+    
+    {/* 1. Ver Insights */}
+    <button
+      onClick={() => setOpenInsights(true)}
+      className="flex flex-col items-center gap-3 w-full group"
+    >
+      <div className="w-full aspect-square max-w-[64px] rounded-2xl bg-zinc-800 group-hover:bg-zinc-700 flex items-center justify-center border border-white/5 transition-all group-active:scale-95 shadow-lg">
+        <BarChart2 className="w-6 h-6 text-emerald-400 group-hover:text-emerald-300 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
+      </div>
+      <span className="text-[11px] font-medium text-zinc-400 group-hover:text-zinc-200">
+        Insights
+      </span>
+    </button>
+
+    {/* 2. Regenerar Dia */}
+    <RegenerateDayButton 
+      dia={diaSelecionado} 
+      planoAtual={plan} 
+      onRegenerate={(novoDia) => {
+        const novosTreinos = [...plan.treinos];
+        const indexGlobal = treinosDoDia[0]?._globalIndex;
+        if (typeof indexGlobal === 'number') {
+          novosTreinos[indexGlobal] = novoDia;
+          setPlan({ ...plan, treinos: novosTreinos });
+          salvarPlano(user.uid, { ...data, plan: { ...plan, treinos: novosTreinos } });
+        }
+      }}
+      className="flex flex-col items-center gap-3 w-full group"
+    >
+      <div className="w-full aspect-square max-w-[64px] rounded-2xl bg-zinc-800 group-hover:bg-zinc-700 flex items-center justify-center border border-white/5 transition-all group-active:scale-95 relative overflow-hidden shadow-lg">
+        <div className="absolute inset-0 bg-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <Sparkles className="w-6 h-6 text-purple-400 group-hover:text-purple-300 relative z-10 drop-shadow-[0_0_8px_rgba(192,132,252,0.5)]" />
+      </div>
+      <span className="text-[11px] font-medium text-zinc-400 group-hover:text-zinc-200">
+        Regenerar
+      </span>
+    </RegenerateDayButton>
+
+    {/* 3. Cardápio */}
+    {isUltra && plan?.treinos ? (
+      <button
+        onClick={handleGenerateCompletePlan}
+        disabled={saving}
+        className="flex flex-col items-center gap-3 w-full group"
+      >
+        <div className="w-full aspect-square max-w-[64px] rounded-2xl bg-zinc-800 group-hover:bg-zinc-700 flex items-center justify-center border border-white/5 transition-all group-active:scale-95 relative overflow-hidden shadow-lg">
+           <div className="absolute inset-0 bg-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+           <Apple className="w-6 h-6 text-pink-400 group-hover:text-pink-300 relative z-10 drop-shadow-[0_0_8px_rgba(244,114,182,0.5)]" />
+        </div>
+        <span className="text-[11px] font-medium text-zinc-400 group-hover:text-zinc-200">
+          Cardápio
+        </span>
+      </button>
+    ) : (
+      <div className="flex flex-col items-center gap-3 w-full opacity-30">
+        <div className="w-full aspect-square max-w-[64px] rounded-2xl bg-zinc-800 border border-white/5 flex items-center justify-center">
+          <Apple className="w-6 h-6 text-zinc-500" />
+        </div>
+        <span className="text-[11px] text-zinc-600">Cardápio</span>
+      </div>
+    )}
+
+    {/* 4. Editar */}
+    <button
+      onClick={() => setIsEditingForm(true)}
+      className="flex flex-col items-center gap-3 w-full group"
+    >
+      <div className="w-full aspect-square max-w-[64px] rounded-2xl bg-zinc-800 group-hover:bg-zinc-700 flex items-center justify-center border border-white/5 transition-all group-active:scale-95 shadow-lg">
+        <Edit2 className="w-6 h-6 text-blue-400 group-hover:text-blue-300 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]" />
+      </div>
+      <span className="text-[11px] font-medium text-zinc-400 group-hover:text-zinc-200">
+        Editar
+      </span>
+    </button>
+
+  </div>
+</div>
+
+</div>
 
           {analysis && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
