@@ -1,7 +1,6 @@
-import React from "react";
-import { Check, Rocket, Crown, Star, X, Sparkles } from "lucide-react";
+import React, { useState } from "react";
+import { Check, Rocket, Crown, Star, Zap, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
-import Container from "@/components/Container";
 
 export default function PremiumPage({
   user,
@@ -9,59 +8,63 @@ export default function PremiumPage({
   onPlanChange,
   onSelectScreen,
 }) {
+  const [billing, setBilling] = useState("year"); // Padrão: Anual (Melhor para conversão)
+  const isYearly = billing === "year";
   const currentPlan = (userPlan || "free").toUpperCase();
+
+  // Função que direciona para o checkout correto salvando a escolha
+  const handleSubscribe = (planType) => {
+    sessionStorage.setItem("fyzen_billing", billing); // Salva 'month' ou 'year'
+    
+    if (planType === "pro") onSelectScreen("checkout-pro");
+    if (planType === "ultra") onSelectScreen("checkout-ultra");
+  };
 
   const planos = [
     {
+      id: "free",
       nome: "Free",
       preco: "0",
-      descricao: "Perfeito para começar!",
+      periodo: "/sempre",
+      descricao: "Para conhecer a plataforma.",
       cor: "from-slate-700 to-slate-800",
       icone: Star,
       beneficios: [
         "Gerar treinos básicos",
-        "Gerar plano alimentar reduzido",
-        "Salvar plano na nuvem",
-        "Acessar histórico",
         "Acesso limitado aos treinos",
-      ],
-      bloqueados: [
-        "Relatório semanal",
-        "Análise muscular",
-        "Trocar exercícios",
-        "Gerar treinos com IA",
-        "Plano alimentar completo com IA",
-        "Treinos ilimitados",
+        "Salvar histórico simples",
       ],
       destaque: false,
     },
     {
+      id: "pro",
       nome: "PRO",
-      preco: "14.90",
-      descricao: "Para quem quer resultados de verdade.",
+      // Lógica de Preço Visual
+      precoDisplay: isYearly ? "12,49" : "14,90",
+      faturaTexto: isYearly ? "Faturado R$ 149,90 anualmente" : "Faturado mensalmente",
+      economizaBadge: isYearly ? "ECONOMIZE 16%" : null,
+      descricao: "Para quem quer resultados reais.",
       cor: "from-teal-500 to-emerald-500",
       icone: Rocket,
       beneficios: [
         "Tudo do Free",
         "Trocar exercícios da semana",
         "Relatório semanal (básico)",
-        "Treinos melhores e variados",
+        "Plano alimentar completo",
+        "Treinos variados e avançados",
       ],
-      bloqueados: [
-        "Análise avançada ULTRA",
-        "Treinos com IA",
-        "Insights de musculatura",
-        "Plano alimentar completo com IA",
-      ],
-      destaque: true,
-      moeda: "BRL",
-      simbolo: "R$",
+      destaque: false,
+      acao: () => handleSubscribe("pro"),
     },
     {
+      id: "ultra",
       nome: "ULTRA",
-      preco: "24.90",
-      descricao: "A experiência mais completa.",
-      cor: "from-purple-500 to-pink-500",
+      // Lógica de Preço Visual
+      precoDisplay: isYearly ? "21,66" : "24,90",
+      faturaTexto: isYearly ? "Faturado R$ 259,90 anualmente" : "Faturado mensalmente",
+      economizaBadge: isYearly ? "2 MESES GRÁTIS 🔥" : null,
+      descricao: "A experiência definitiva com IA.",
+      cor: "from-violet-600 to-fuchsia-600",
       icone: Crown,
       beneficios: [
         "Tudo do PRO",
@@ -71,228 +74,157 @@ export default function PremiumPage({
         "Insights semanais completos",
         "Plano alimentar completo com IA",
       ],
-      bloqueados: [],
-      destaque: false,
-      moeda: "BRL",
-      simbolo: "R$",
+      destaque: true, // Card maior/brilhante
+      acao: () => handleSubscribe("ultra"),
     },
   ];
 
-  function renderStatus(planoNome) {
-    const nome = planoNome.toUpperCase();
-
-    if (nome === "PRO" && currentPlan === "PRO") {
-      return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-teal-500/20 text-teal-300 border border-teal-500/30">
-          Plano Atual
-        </span>
-      );
-    }
-
-    if (nome === "ULTRA" && currentPlan === "ULTRA") {
-      return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-          Plano Atual
-        </span>
-      );
-    }
-
-    if (nome === "FREE" && currentPlan === "FREE") {
-      return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-slate-500/20 text-slate-300 border border-slate-500/30">
-          Plano Atual
-        </span>
-      );
-    }
-
-    return null;
-  }
-
-  function handleSelectPlan(planoNome) {
-    const nome = planoNome.toUpperCase();
-
-    // 3️⃣ Se o usuário tem ULTRA, não pode assinar PRO
-    if (currentPlan === "ULTRA" && nome === "PRO") {
-      alert("❌ Você já tem o plano ULTRA! Não é possível fazer downgrade para PRO.");
-      return;
-    }
-
-    if (nome === "FREE") {
-      alert("Você já tem acesso ao plano Free!");
-      return;
-    }
-
-    if (nome === "PRO") {
-      onSelectScreen?.("checkout-pro");
-    } else if (nome === "ULTRA") {
-      onSelectScreen?.("checkout-ultra");
-    }
-  }
-
-  // Verifica se o botão deve ser desabilitado
-  function isButtonDisabled(planoNome) {
-    const nome = planoNome.toUpperCase();
-    const isCurrentPlan = nome === currentPlan;
-    
-    // Desabilita PRO se o usuário tem ULTRA
-    const isDowngrade = currentPlan === "ULTRA" && nome === "PRO";
-    
-    return isCurrentPlan || isDowngrade;
-  }
-
-  // Texto do botão
-  function getButtonText(planoNome) {
-    const nome = planoNome.toUpperCase();
-    const isCurrentPlan = nome === currentPlan;
-    
-    if (isCurrentPlan) return "Plano Atual";
-    if (currentPlan === "ULTRA" && nome === "PRO") return "Você é ULTRA";
-    if (planoNome === "0") return "Plano Gratuito";
-    
-    return "Assinar Agora";
-  }
-
   return (
-    <Container className="py-12">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+    <div className="max-w-6xl mx-auto py-8 px-4 pb-24 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      
+      {/* Header */}
+      <div className="text-center mb-10">
+        <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
+          Escolha o plano ideal para sua evolução
+        </h1>
+        <p className="text-zinc-400">
+          Cancele ou troque de plano quando quiser.
+        </p>
       </div>
 
-      <div className="relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Sparkles className="w-8 h-8 text-teal-400" />
-            <h1 className="text-4xl md:text-5xl font-bold text-white">
-              Escolha seu plano
-            </h1>
+      {/* 🔄 TOGGLE MENSAL / ANUAL */}
+      <div className="flex justify-center mb-12">
+        <div className="bg-zinc-900 border border-white/10 p-1 rounded-full flex items-center relative">
+          
+          {/* Fundo deslizante (Indicador Ativo) */}
+          <motion.div 
+            className="absolute top-1 bottom-1 bg-zinc-800 rounded-full shadow-sm z-0"
+            initial={false}
+            animate={{
+              left: isYearly ? "50%" : "4px",
+              width: isYearly ? "calc(50% - 4px)" : "calc(50% - 4px)"
+            }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          />
+
+          <button
+            onClick={() => setBilling("month")}
+            className={`relative z-10 w-32 py-2 text-sm font-medium rounded-full transition-colors ${
+              !isYearly ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+            }`}
+          >
+            Mensal
+          </button>
+          
+          <button
+            onClick={() => setBilling("year")}
+            className={`relative z-10 w-32 py-2 text-sm font-medium rounded-full transition-colors flex items-center justify-center gap-2 ${
+              isYearly ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+            }`}
+          >
+            Anual
+          </button>
+
+          {/* Badge Flutuante "Desconto" */}
+          <div className="absolute -top-3 -right-6 bg-emerald-500 text-black text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg animate-bounce">
+            -20% OFF
           </div>
-          <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-            Escolha o plano que combina com o seu momento. Você pode mudar de
-            plano sempre que quiser.
-          </p>
-        </motion.div>
-
-        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {planos.map((plano, idx) => {
-            const Icon = plano.icone;
-            const isCurrentPlan = plano.nome.toUpperCase() === currentPlan;
-            const isDisabled = isButtonDisabled(plano.nome);
-
-            return (
-              <motion.div
-                key={plano.nome}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                className={`relative rounded-3xl p-6 border-2 transition-all hover:scale-[1.02] ${
-                  plano.destaque
-                    ? "border-teal-500/50 bg-gradient-to-b from-teal-500/5 to-transparent shadow-xl shadow-teal-500/10"
-                    : isCurrentPlan
-                    ? "border-white/20 bg-slate-900/50"
-                    : "border-white/10 bg-slate-900/30"
-                } ${plano.destaque ? "transform md:scale-105" : ""}`}
-              >
-                {plano.destaque && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-teal-400 to-emerald-400 text-slate-900 shadow-lg">
-                      🔥 Mais Popular
-                    </span>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${plano.cor} flex items-center justify-center shadow-lg`}
-                    >
-                      <Icon className="w-7 h-7 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-white">
-                        {plano.nome}
-                      </h3>
-                    </div>
-                  </div>
-                  {renderStatus(plano.nome)}
-                </div>
-
-                <p className="text-slate-400 text-sm mb-4">{plano.descricao}</p>
-
-                {plano.preco !== "0" && (
-                  <div className="mb-6">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-5xl font-bold text-white">
-                        {plano.simbolo} {plano.preco}
-                      </span>
-                      <span className="text-slate-400 text-lg">/mês</span>
-                    </div>
-                  </div>
-                )}
-
-                <div className="space-y-3 mb-6">
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
-                    Inclui:
-                  </p>
-                  {plano.beneficios.map((b, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-teal-400 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-slate-300">{b}</span>
-                    </div>
-                  ))}
-
-                  {plano.bloqueados.length > 0 && (
-                    <>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mt-4">
-                        Não inclui:
-                      </p>
-                      {plano.bloqueados.map((b, i) => (
-                        <div key={i} className="flex items-start gap-2">
-                          <X className="w-5 h-5 text-slate-600 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-slate-500">{b}</span>
-                        </div>
-                      ))}
-                    </>
-                  )}
-                </div>
-
-                <button
-                  onClick={() => handleSelectPlan(plano.nome)}
-                  disabled={isDisabled}
-                  className={`w-full py-3.5 rounded-xl font-semibold transition-all text-sm ${
-                    isDisabled
-                      ? "bg-slate-700/50 text-slate-500 cursor-not-allowed"
-                      : plano.destaque
-                      ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white hover:shadow-lg hover:shadow-teal-500/50 hover:scale-105"
-                      : "bg-white/10 text-white hover:bg-white/20"
-                  }`}
-                >
-                  {getButtonText(plano.nome)}
-                </button>
-              </motion.div>
-            );
-          })}
         </div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="text-center mt-12 space-y-2"
-        >
-          <p className="text-slate-500 text-sm">
-            ✨ Todos os planos incluem acesso à plataforma e atualizações
-            gratuitas.
-          </p>
-          <p className="text-slate-500 text-sm">
-            🔒 Cancele quando quiser. Sem multas ou taxas escondidas.
-          </p>
-        </motion.div>
       </div>
-    </Container>
+
+      {/* Grid de Planos */}
+      <div className="grid md:grid-cols-3 gap-6 items-start">
+        {planos.map((plano) => {
+          const isCurrent = currentPlan === plano.nome.toUpperCase();
+          const Icone = plano.icone;
+          const isUltra = plano.nome === "ULTRA";
+
+          return (
+            <div
+              key={plano.nome}
+              className={`relative rounded-3xl p-6 border transition-all duration-300 flex flex-col h-full ${
+                plano.destaque
+                  ? "bg-zinc-900/80 border-fuchsia-500/50 shadow-[0_0_30px_rgba(192,38,211,0.15)] scale-105 z-10"
+                  : "bg-zinc-900/40 border-white/10 hover:border-white/20"
+              }`}
+            >
+              {/* Badge de Economia (Só Anual) */}
+              {plano.economizaBadge && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-400 to-teal-500 text-black text-[10px] font-bold px-3 py-1 rounded-full shadow-lg whitespace-nowrap">
+                  {plano.economizaBadge}
+                </div>
+              )}
+
+              {/* Cabeçalho do Card */}
+              <div className="mb-6">
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${plano.cor} flex items-center justify-center mb-4 shadow-lg`}>
+                  <Icone className="text-white" size={24} />
+                </div>
+                <h3 className="text-lg font-bold text-white">{plano.nome}</h3>
+                <p className="text-xs text-zinc-400 h-8">{plano.descricao}</p>
+              </div>
+
+              {/* Preço */}
+              <div className="mb-6 p-4 rounded-2xl bg-black/20 border border-white/5">
+                <div className="flex items-end gap-1">
+                  <span className="text-sm text-zinc-400 mb-1">R$</span>
+                  <span className="text-3xl font-bold text-white">{plano.preco === "0" ? "0" : plano.precoDisplay}</span>
+                  <span className="text-sm text-zinc-500 mb-1">/mês</span>
+                </div>
+                {plano.preco !== "0" && (
+                  <p className="text-[10px] text-emerald-400 mt-1 font-medium">
+                    {plano.faturaTexto}
+                  </p>
+                )}
+              </div>
+
+              {/* Lista de Benefícios */}
+              <ul className="space-y-3 mb-8 flex-1">
+                {plano.beneficios.map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-zinc-300">
+                    <Check size={16} className={`shrink-0 mt-0.5 ${isUltra ? "text-fuchsia-400" : "text-emerald-400"}`} />
+                    <span className="leading-tight">{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Botão de Ação */}
+              <div className="mt-auto">
+                {isCurrent ? (
+                  <div className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-center text-zinc-400 text-sm font-medium cursor-default">
+                    Seu plano atual
+                  </div>
+                ) : plano.preco === "0" ? (
+                  <div className="w-full py-3 text-center text-zinc-500 text-sm">
+                    Plano padrão
+                  </div>
+                ) : (
+                  <button
+                    onClick={plano.acao}
+                    className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2 ${
+                      isUltra 
+                        ? "bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white shadow-fuchsia-900/20"
+                        : "bg-white text-black hover:bg-zinc-200"
+                    }`}
+                  >
+                    {isUltra && <Zap size={16} fill="currentColor" />}
+                    Assinar {plano.nome}
+                  </button>
+                )}
+              </div>
+              
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mt-12 text-center">
+        <p className="text-xs text-zinc-500 flex items-center justify-center gap-2">
+          <ShieldCheck size={14} />
+          Pagamento processado com segurança pelo Stripe. Garantia de 7 dias.
+        </p>
+      </div>
+
+    </div>
   );
 }

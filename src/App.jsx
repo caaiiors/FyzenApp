@@ -122,7 +122,12 @@ export default function App() {
     { icon: Apple, label: "Dieta", value: SCREENS.NUTRITION },
     { icon: TrendingUp, label: "Evolução", value: SCREENS.PROGRESS },
     { icon: Target, label: "Metas", value: SCREENS.GOALS },
-    { icon: CreditCard, label: "Plano", value: SCREENS.BILLING },
+    {
+      icon: Sparkles,
+      label: userPlan !== "free" ? "Seu plano" : "Premium",
+      value: SCREENS.PREMIUM,
+    },
+    { icon: CreditCard, label: "Minha assinatura", value: SCREENS.BILLING },
   ];
 
   if (userPlan?.toLowerCase() === "ultra") {
