@@ -17,6 +17,8 @@ import EmailActionHandler from "./screens/EmailActionHandler.jsx";
 import CheckoutProPage from "./screens/CheckoutProPage.jsx";
 import CheckoutUltraPage from "./screens/CheckoutUltraPage.jsx";
 import BillingScreen from "./screens/BillingScreen.jsx";
+import FacebookLandingPage from './screens/FacebookLandingPage.jsx';
+
 
 // Contextos e Serviços
 import { subscriptionEngine } from "./lib/subscriptionEngine";
@@ -130,6 +132,10 @@ export default function App() {
     { icon: CreditCard, label: "Minha assinatura", value: SCREENS.BILLING },
   ];
 
+if (window.location.pathname === '/facebook') {
+  return <FacebookLandingPage onSelectScreen={setCurrentScreen} user={user} />;
+}
+
   if (userPlan?.toLowerCase() === "ultra") {
     navItems.splice(2, 0, { icon: Activity, label: "Ultra", value: SCREENS.ULTRA_DASHBOARD });
   }
@@ -152,6 +158,8 @@ export default function App() {
       case SCREENS.CHECKOUT_ULTRA: return <CheckoutUltraPage onSelectScreen={setCurrentScreen} />;
       case SCREENS.ADMIN: return isAdmin ? <AdminScreen user={user} isAdmin={true} /> : null;
       case SCREENS.ULTRA_DASHBOARD: return <UltraDashboardProtected onSelectScreen={setCurrentScreen} />;
+      case 'facebook':
+  return <FacebookLandingPage onSelectScreen={setCurrentScreen} user={user} />;
       default: return <HomeScreen {...commonProps} />;
     }
   };
