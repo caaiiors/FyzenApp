@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/facebook",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
