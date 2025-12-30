@@ -107,6 +107,10 @@ export default function App() {
     setCurrentScreen(SCREENS.HOME);
   };
 
+if (window.location.pathname === "/facebook") {
+  return <FacebookLandingPage onSelectScreen={setCurrentScreen} user={user} />;
+}
+
   if (loadingAuth) return <div className="min-h-screen bg-[#09090b] flex items-center justify-center text-zinc-500 font-medium tracking-tight">Carregando Fyzen...</div>;
   if (!user) return <LoginScreen onLoginSuccess={setUser} />;
   
@@ -159,8 +163,6 @@ if (window.location.pathname === '/facebook') {
       case SCREENS.ADMIN: return isAdmin ? <AdminScreen user={user} isAdmin={true} /> : null;
       case SCREENS.ULTRA_DASHBOARD: return <UltraDashboardProtected onSelectScreen={setCurrentScreen} />;
       case 'facebook':
-  return <FacebookLandingPage onSelectScreen={setCurrentScreen} user={user} />;
-      default: return <HomeScreen {...commonProps} />;
     }
   };
 
