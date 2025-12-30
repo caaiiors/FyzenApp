@@ -60,10 +60,6 @@ export default function App() {
   const [loadingPlan, setLoadingPlan] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  if (window.location.pathname === "/facebook") {
-  return <FacebookLandingPage onSelectScreen={setCurrentScreen} user={user} />;
-}
-
   // --- Lógica de Auth e Plano (Mantida) ---
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
