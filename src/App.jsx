@@ -60,6 +60,10 @@ export default function App() {
   const [loadingPlan, setLoadingPlan] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  if (window.location.pathname === "/facebook") {
+  return <FacebookLandingPage onSelectScreen={setCurrentScreen} user={user} />;
+}
+
   // --- Lógica de Auth e Plano (Mantida) ---
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -106,10 +110,6 @@ export default function App() {
     setUserPlan("free");
     setCurrentScreen(SCREENS.HOME);
   };
-
-if (window.location.pathname === "/facebook") {
-  return <FacebookLandingPage onSelectScreen={setCurrentScreen} user={user} />;
-}
 
   if (loadingAuth) return <div className="min-h-screen bg-[#09090b] flex items-center justify-center text-zinc-500 font-medium tracking-tight">Carregando Fyzen...</div>;
   if (!user) return <LoginScreen onLoginSuccess={setUser} />;
