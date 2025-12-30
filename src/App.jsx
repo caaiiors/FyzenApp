@@ -136,10 +136,6 @@ export default function App() {
     { icon: CreditCard, label: "Minha assinatura", value: SCREENS.BILLING },
   ];
 
-if (window.location.pathname === '/facebook') {
-  return <FacebookLandingPage onSelectScreen={setCurrentScreen} user={user} />;
-}
-
   if (userPlan?.toLowerCase() === "ultra") {
     navItems.splice(2, 0, { icon: Activity, label: "Ultra", value: SCREENS.ULTRA_DASHBOARD });
   }
@@ -162,7 +158,6 @@ if (window.location.pathname === '/facebook') {
       case SCREENS.CHECKOUT_ULTRA: return <CheckoutUltraPage onSelectScreen={setCurrentScreen} />;
       case SCREENS.ADMIN: return isAdmin ? <AdminScreen user={user} isAdmin={true} /> : null;
       case SCREENS.ULTRA_DASHBOARD: return <UltraDashboardProtected onSelectScreen={setCurrentScreen} />;
-      case 'facebook':
     }
   };
 
