@@ -267,7 +267,7 @@ const FacebookLandingPage = ({ onSelectScreen, user }) => {
                 >
                   <div className="w-0 h-0 border-l-8 border-r-0 border-t-5 border-b-5 border-l-white border-t-transparent border-b-transparent ml-1" />
                 </motion.div>
-                <p className="text-slate-300 font-semibold">Clique para ver resultado real</p>
+                <p className="text-slate-300 font-semibold">Clique para ver o trailer</p>
               </div>
             </div>
             {/* Glow effect */}
