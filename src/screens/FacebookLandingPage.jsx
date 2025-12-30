@@ -546,10 +546,6 @@ const FacebookLandingPage = ({ onSelectScreen, user }) => {
           <div className="space-y-4">
             {[
               {
-                question: 'Como funciona o período de 7 dias grátis?',
-                answer: 'Você tem 7 dias completos para testar Fyzen sem cobranças. Cancelar é fácil e sem multa. Se gostar, continua automaticamente após os 7 dias.'
-              },
-              {
                 question: 'Qual a diferença entre PRO e ULTRA?',
                 answer: 'PRO inclui treinos e dieta básica com IA. ULTRA adiciona análise corporal avançada, coach IA 24/7 e insights semanais detalhados.'
               },
@@ -567,7 +563,7 @@ const FacebookLandingPage = ({ onSelectScreen, user }) => {
               },
               {
                 question: 'Preciso de equipamento?',
-                answer: 'Não obrigatoriamente. Oferecemos planos com peso corporal, com halteres, com barra e muito mais.'
+                answer: 'Não obrigatoriamente. Oferecemos planos de treino com peso corporal, com halteres, com barra e muito mais.'
               }
             ].map((item, idx) => (
               <FAQItem key={idx} item={item} index={idx} />
