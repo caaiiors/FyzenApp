@@ -1,15 +1,31 @@
-import React from "react";
+import React, { useEffect } from 'react'; // <--- Importe useEffect
 import StripeCheckoutButton from "../components/premium/StripeCheckoutButton.jsx";
 
-const PRICE_ID_ULTRA_MONTHLY = "price_1ScrikRw5LzzuwFsekQBkj9Y"; // seu mensal atual [file:114]
-const PRICE_ID_ULTRA_YEARLY = "price_1SjUGN2LPaSfKXCCZsi0tIpU";  // anual (R$ 259,90)
+const PRICE_ID_ULTRA_MONTHLY = "price_1ScrikRw5LzzuwFsekQBkj9Y";
+const PRICE_ID_ULTRA_YEARLY = "price_1SjUGN2LPaSfKXCCZsi0tIpU";
 
 export default function CheckoutUltraPage() {
   const billing = sessionStorage.getItem("fyzen_billing") || "month";
   const isYearly = billing === "year";
-
   const priceId = isYearly ? PRICE_ID_ULTRA_YEARLY : PRICE_ID_ULTRA_MONTHLY;
   const label = isYearly ? "R$ 259,90 / ano" : "R$ 24,90 / mês";
+  const precoNumerico = isYearly ? 259.90 : 24.90;
+
+  // 📊 TRACKING: Dispara quando a página de checkout carrega
+  useEffect(() => {
+    try {
+      window.fbq?.('track', 'ViewContent', {
+        currency: 'BRL',
+        value: precoNumerico,
+        content_name: 'Checkout Plano ULTRA - Fyzen',
+        content_type: 'product',
+        content_id: 'ultra'
+      });
+      console.log(`[Tracking] ViewContent: Checkout ULTRA - R$ ${precoNumerico}`);
+    } catch (err) {
+      console.error('[Tracking] Erro Pixel ViewContent:', err);
+    }
+  }, []);
 
   return (
     <div className="max-w-xl mx-auto py-10 px-4">

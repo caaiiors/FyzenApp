@@ -703,8 +703,7 @@ async function handleGenerate(formData) {
     }
   }
 
-  // ✅ ADICIONAR ESTA FUNÇÃO no PlanScreen.jsx (depois da função handleRegenerateWeek)
-async function handleGenerateCompletePlan() {
+  async function handleGenerateCompletePlan() {
   try {
     if (!user) return alert("Faça login.");
     if (!isUltra) return alert("Disponível apenas no Ultra.");

@@ -13,12 +13,67 @@ export default function PremiumPage({
   const currentPlan = (userPlan || "free").toUpperCase();
 
   // Função que direciona para o checkout correto salvando a escolha
-  const handleSubscribe = (planType) => {
-    sessionStorage.setItem("fyzen_billing", billing); // Salva 'month' ou 'year'
-    
-    if (planType === "pro") onSelectScreen("checkout-pro");
-    if (planType === "ultra") onSelectScreen("checkout-ultra");
-  };
+const handleSubscribe = (planType) => {
+  // 📊 ENCONTRA OS DADOS DO PLANO SELECIONADO
+  const planoSelecionado = planos.find(p => p.id === planType);
+  
+  if (!planoSelecionado) {
+    console.error('[Checkout] Plano não encontrado:', planType);
+    return;
+  }
+
+  // Calcula o preço real baseado no período (mensal ou anual)
+  const precoNumerico = parseFloat(planoSelecionado.precoDisplay?.replace(',', '.')) || 0;
+
+  // 📊 TRACKING: Dispara evento no Facebook Pixel (Frontend)
+  try {
+    window.fbq?.('track', 'InitiateCheckout', {
+      currency: 'BRL',
+      value: precoNumerico,
+      content_name: `Plano ${planoSelecionado.nome} - Fyzen`,
+      content_type: 'product',
+      content_id: planType,
+      predicted_ltv: billing === 'year' ? precoNumerico * 12 : precoNumerico * 6
+    });
+    console.log(`[Tracking] InitiateCheckout: ${planoSelecionado.nome} - R$ ${precoNumerico} (${billing})`);
+  } catch (err) {
+    console.error('[Tracking] Erro ao disparar Pixel:', err);
+  }
+
+  // Salva a escolha de período no sessionStorage
+  sessionStorage.setItem("fyzen_billing", billing); // 'month' ou 'year'
+  
+  // Navega para a tela de checkout
+  if (planType === "pro") onSelectScreen("checkout-pro");
+  if (planType === "ultra") onSelectScreen("checkout-ultra");
+};
+
+
+  async function handleSubscribeClick(planName, planPrice, checkoutUrl) {
+  const userEmail = auth.currentUser?.email;
+  
+  if (!userEmail) {
+    alert('Faça login para assinar.');
+    return;
+  }
+
+  // 📊 TRACKING: Envia evento "InitiateCheckout" para o Facebook Pixel
+  try {
+    window.fbq?.('track', 'InitiateCheckout', {
+      currency: 'BRL',
+      value: planPrice, // Preço passado como parâmetro
+      content_name: `Plano ${planName} - Fyzen`, // Ex: "Plano Ultra - Fyzen"
+      content_type: 'product',
+      content_id: planName.toLowerCase() // Ex: "ultra", "pro"
+    });
+    console.log(`[Tracking] InitiateCheckout disparado: ${planName} - R$ ${planPrice}`);
+  } catch (err) {
+    console.error('[Tracking] Erro ao disparar Pixel:', err);
+  }
+
+  // Redireciona para checkout do Stripe
+  window.location.href = checkoutUrl;
+}
 
   const planos = [
     {
@@ -199,17 +254,17 @@ export default function PremiumPage({
                     Plano padrão
                   </div>
                 ) : (
-                  <button
-                    onClick={plano.acao}
-                    className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2 ${
-                      isUltra 
-                        ? "bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white shadow-fuchsia-900/20"
-                        : "bg-white text-black hover:bg-zinc-200"
-                    }`}
-                  >
-                    {isUltra && <Zap size={16} fill="currentColor" />}
-                    Assinar {plano.nome}
-                  </button>
+                    <button
+                      onClick={plano.acao}
+                      className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2 ${
+                        isUltra 
+                          ? "bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white shadow-fuchsia-900/20"
+                          : "bg-white text-black hover:bg-zinc-200"
+                      }`}
+                    >
+                      {isUltra && <Zap size={16} fill="currentColor" />}
+                      Assinar {plano.nome}
+                    </button>
                 )}
               </div>
               
