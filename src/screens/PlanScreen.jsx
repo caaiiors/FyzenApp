@@ -703,11 +703,11 @@ async function handleGenerate(formData) {
     }
   }
 
-  async function handleGenerateCompletePlan() {
+async function handleGenerateCompletePlan() {
   try {
     if (!user) return alert("Faça login.");
     if (!isUltra) return alert("Disponível apenas no Ultra.");
-    
+
     setSaving(true);
     setStatusMsg("Gerando plano completo (Treino + Cardápio)...");
     setIaOverlayText("Gerando plano completo com IA, aguarde...");
@@ -719,13 +719,12 @@ async function handleGenerate(formData) {
       height: parseFloat(form.altura),
       age: parseFloat(form.idade),
       sex: form.sexo === "feminino" ? "female" : "male",
-      activityLevel: form.nivel === "iniciante" ? "light" : 
-                     form.nivel === "intermediario" ? "moderate" : "active",
+      activityLevel: form.nivel === "iniciante" ? "light" :
+        form.nivel === "intermediario" ? "moderate" : "active",
       goal: form.objetivo === "emagrecimento" ? "weight_loss" :
-            form.objetivo === "hipertrofia" ? "muscle_gain" : "maintenance",
+        form.objetivo === "hipertrofia" ? "muscle_gain" : "maintenance",
       experience: form.nivel,
     };
-
 
     const response = await fetch(`${API_URL}/plan/generate`, {
       method: "POST",
@@ -746,38 +745,33 @@ async function handleGenerate(formData) {
     const data = await response.json();
 
     if (data.success && data.data) {
-      // ✅ Atualiza APENAS o cardápio, mantém o treino
       const planData = data.data;
-      
-      setPlan(planData.workout);
+
+      // ✅ APENAS atualizar o cardápio e análise nutrição
+      // ❌ NÃO sobrescrever o treino!
       setNutrition(planData.meal);
       setAnalysis(planData.nutrition);
 
-      // ✅ Salva no Firestore SEM apagar o treino
+      // ✅ Salva APENAS o cardápio no Firestore, mantém treino intacto
       await setDoc(doc(db, "planos", user.uid), {
-        form,
-        plan: planData.workout,
         meal: planData.meal,
         nutrition: planData.nutrition,
-        analysis,
-        ownerUid: user.uid,
         updatedAt: serverTimestamp()
-      }, { merge: true }); // ✅ merge: true NÃO apaga os outros campos
+      }, { merge: true }); // ✅ merge: true preserva todos os outros campos!
 
-      setStatusMsg("Plano completo gerado e salvo!");
+      setStatusMsg("Cardápio gerado e salvo!");
     } else {
       throw new Error("Resposta inválida do servidor");
     }
   } catch (err) {
-    console.error("❌ Erro ao gerar plano completo:", err);
-    setStatusMsg("Erro ao gerar plano completo: " + err.message);
+    console.error("❌ Erro ao gerar cardápio:", err);
+    setStatusMsg("Erro ao gerar cardápio: " + err.message);
     alert("Erro: " + err.message);
   } finally {
     setSaving(false);
     setIaOverlayOpen(false);
   }
 }
-
 
   // ========== COMPONENTES DAS ETAPAS ==========
   const Step1Personal = ({ data, updateField }) => (
