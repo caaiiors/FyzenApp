@@ -125,7 +125,6 @@ const handleSubscribe = (planType) => {
       beneficios: [
         "Tudo do PRO",
         "Painel Ultra completo",
-        "Treinos com IA ilimitados",
         "Volume por grupo muscular",
         "Insights semanais completos",
         "Plano alimentar completo com IA",

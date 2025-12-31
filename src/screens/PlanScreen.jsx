@@ -455,23 +455,25 @@ export default function PlanScreen() {
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (!diaSelecionado) return;
-    const indexAtual = diasSemana.indexOf(diaAtual);
-    const indexTreino = diasSemana.indexOf(diaSelecionado);
-    if (indexTreino > indexAtual) {
-      setBloqueado(true);
-      setMensagem(`Hoje é ${diaAtual}. Volte na ${diaSelecionado} para completar este treino.`);
-      return;
-    }
-    if (indexTreino < indexAtual) {
-      setBloqueado(true);
-      setMensagem(`Você já passou o dia de ${diaSelecionado}.`);
-      return;
-    }
-    setBloqueado(false);
-    setMensagem("");
-  }, [diaSelecionado, diaAtual]);
+useEffect(() => {
+  if (!diaSelecionado) return
+  const indexAtual = diasSemana.indexOf(diaAtual)
+  const indexTreino = diasSemana.indexOf(diaSelecionado)
+  
+  if (indexTreino > indexAtual) {
+    setBloqueado(true)
+    setMensagem(`Hoje é ${diaAtual}. Este treino estará disponível na ${diaSelecionado}.`)
+    return
+  }
+  if (indexTreino < indexAtual) {
+    setBloqueado(true)
+    setMensagem(`Treino de ${diaSelecionado} já foi concluído.`)
+    return
+  }
+  setBloqueado(false)
+  setMensagem('')
+}, [diaSelecionado, diaAtual])
+
 
   useEffect(() => {
     if (isEditingForm || !plan?.treinos || skipInsights) return;
@@ -1412,56 +1414,81 @@ async function handleRegenerarSemana(flatTreinos) {
 </div>
 
 <div data-treino-section className="space-y-4">
-  {bloqueado ? (
-    <div className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl">
-      <p className="text-orange-300 text-sm">{mensagem}</p>
+  {/* Banner de aviso se bloqueado */}
+  {bloqueado && (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl mb-4"
+    >
+      <div className="flex items-center gap-2">
+        <svg className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+        <p className="text-orange-300 text-sm font-medium">{mensagem}</p>
+      </div>
+    </motion.div>
+  )}
+  
+  {/* Lista de treinos (sempre visível, mas com overlay se bloqueado) */}
+  {treinosDoDia.length === 0 ? (
+    <div className="glass-card p-8 text-center">
+      <p className="text-slate-400">Nenhum treino para este dia</p>
     </div>
   ) : (
-    <>
-      {treinosDoDia.length === 0 ? (
-        <div className="glass-card p-8 text-center">
-          <p className="text-slate-400">Nenhum treino para este dia</p>
+    <div className={bloqueado ? 'relative' : ''}>
+      {/* Overlay de bloqueio */}
+      {bloqueado && (
+        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-10 rounded-xl flex items-center justify-center">
+          <div className="text-center p-6">
+            <svg className="w-12 h-12 text-orange-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <p className="text-white font-bold text-lg mb-1">Treino Bloqueado</p>
+            <p className="text-slate-300 text-sm">Volte no dia correto para desbloquear</p>
+          </div>
         </div>
-      ) : (
-        treinosDoDia.map((treino, idx) => (
-          <motion.div
-            key={idx}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.1 }}
-            className="glass-card p-6"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Dumbbell className="w-5 h-5 text-primary-400" />
-                {treino.grupo || "Grupo sem nome"}
-              </h3>
-              {isPro && (
-                <button
-                  onClick={() => setEditingGroup(treino)}
-                  className="text-sm px-3 py-1 rounded-lg bg-primary-500/10 text-primary-300 hover:bg-primary-500/20 transition-all"
-                >
-                  Editar
-                </button>
-              )}
-            </div>
-
-            <WorkoutChecklist
-              treino={treino.exercicios}
-              dia={diaAtual}
-              grupo={treino.grupo}
-              bloqueado={bloqueado}
-            />
-
-            {!isPro && (
-              <p className="text-xs text-slate-500 mt-4">
-                Personalização de grupo disponível no plano Pro.
-              </p>
-            )}
-          </motion.div>
-        ))
       )}
-    </>
+      
+      {/* Treinos com opacidade reduzida se bloqueado */}
+      {treinosDoDia.map((treino, idx) => (
+        <motion.div
+          key={idx}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: bloqueado ? 0.5 : 1, y: 0 }}
+          transition={{ delay: idx * 0.1 }}
+          className={`glass-card p-6 ${bloqueado ? 'pointer-events-none select-none' : ''}`}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <Dumbbell className="w-5 h-5 text-primary-400" />
+              {treino.grupo || 'Grupo sem nome'}
+            </h3>
+            {isPro && !bloqueado && (
+              <button
+                onClick={() => setEditingGroup(treino)}
+                className="text-sm px-3 py-1 rounded-lg bg-primary-500/10 text-primary-300 hover:bg-primary-500/20 transition-all"
+              >
+                Editar
+              </button>
+            )}
+          </div>
+          
+          <WorkoutChecklist
+            treino={treino.exercicios}
+            dia={diaAtual}
+            grupo={treino.grupo}
+            bloqueado={bloqueado}
+          />
+          
+          {!isPro && (
+            <p className="text-xs text-slate-500 mt-4">
+              💎 Personalização de grupo disponível no plano Pro.
+            </p>
+          )}
+        </motion.div>
+      ))}
+    </div>
   )}
 </div>
 
