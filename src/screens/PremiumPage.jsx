@@ -107,6 +107,7 @@ const handleSubscribe = (planType) => {
         "Relatório semanal (básico)",
         "Plano alimentar completo",
         "Treinos variados e avançados",
+        "Treinos com IA ilimitados",
       ],
       destaque: false,
       acao: () => handleSubscribe("pro"),

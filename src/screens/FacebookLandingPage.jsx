@@ -546,10 +546,6 @@ const FacebookLandingPage = ({ onSelectScreen, user }) => {
           <div className="space-y-4">
             {[
               {
-                question: 'Qual a diferença entre PRO e ULTRA?',
-                answer: 'PRO inclui treinos e dieta básica com IA. ULTRA adiciona análise corporal avançada, coach IA 24/7 e insights semanais detalhados.'
-              },
-              {
                 question: 'Posso cancelar a qualquer momento?',
                 answer: 'Sim! Você pode cancelar sua assinatura a qualquer momento no seu painel. Sem taxas de cancelamento, sem complicações.'
               },

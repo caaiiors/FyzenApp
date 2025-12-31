@@ -586,8 +586,8 @@ async function handleGenerate(formData) {
 
   let planoTreino = [];
 
-  if (isUltra) {
-    setIaOverlayText("Gerando com IA Ultra, aguarde...");
+  if (isPro || isUltra) {
+    setIaOverlayText("Gerando com IA, aguarde...");
     setIaOverlayOpen(true);
 
     try {
@@ -665,7 +665,7 @@ async function handleGenerate(formData) {
   async function handleRegenerateWeek() {
     try {
       if (!user) return alert("Faça login.");
-      if (!isUltra) return alert("Disponível apenas no Ultra.");
+      if (!isPro && !isUltra) return alert("Disponível nos planos Pro e Ultra.");
       setSaving(true);
       setStatusMsg("Gerando nova semana com IA...");
       const semana = await regenerarSemanaIA(form);
@@ -706,7 +706,13 @@ async function handleGenerate(formData) {
 async function handleGenerateCompletePlan() {
   try {
     if (!user) return alert("Faça login.");
-    if (!isUltra) return alert("Disponível apenas no Ultra.");
+    if (!isPro && !isUltra) {
+      return alert("Disponível nos planos Pro e Ultra.");
+    }
+
+    if (isPro && !isUltra) {
+      return handleRegenerateWeek();
+    }
 
     setSaving(true);
     setStatusMsg("Gerando plano completo (Treino + Cardápio)...");
@@ -1265,12 +1271,13 @@ async function handleRegenerarSemana(flatTreinos) {
   {/* Header da Toolbar */}
   <div className="flex items-center justify-between mb-5 px-1">
     <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Ações Rápidas</h3>
-    {isUltra && (
-      <div className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-full">
-        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_5px_#10b981]" />
-        <span className="text-[10px] font-bold text-emerald-400">IA ATIVA</span>
-      </div>
-    )}
+{(isPro || isUltra) && (
+  <div className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-full">
+    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_5px_rgba(16,185,129,1)]" />
+    <span className="text-[10px] font-bold text-emerald-400">IA ATIVA</span>
+  </div>
+)}
+
   </div>
 
   {/* Grid de Ícones (Centralizado e Expandido) */}
