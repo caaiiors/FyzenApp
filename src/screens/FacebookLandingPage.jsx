@@ -237,7 +237,7 @@ const FacebookLandingPage = ({ onSelectScreen, user }) => {
             >
               <div className="flex items-center gap-2">
                 <Zap className="w-5 h-5 text-cyan-400" />
-                <span>+10.000 usuários ativos</span>
+                <span>+100 usuários ativos</span>
               </div>
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-purple-400" />
