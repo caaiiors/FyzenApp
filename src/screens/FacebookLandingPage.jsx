@@ -224,7 +224,7 @@ const FacebookLandingPage = ({ onSelectScreen, user }) => {
                 }}
                 className="px-8 py-4 bg-slate-800/50 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold text-lg transition-all"
                 >
-                Crie sua conta
+                Crie sua conta GRÁTIS
             </button>
 
             </motion.div>
