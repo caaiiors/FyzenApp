@@ -551,7 +551,7 @@ const FacebookLandingPage = ({ onSelectScreen, user }) => {
               },
             {
                 question: 'Como usar o cupom FYZEN20?',
-                answer: 'Primeiro, crie sua conta Free no Fyzen. Depois, acesse a seção "Seu Plano" (ou "Premium"), escolha PRO ou ULTRA, e clique em "Assinar PRO" (ou "Assinar ULTRA"). No checkout do Stripe, você verá um campo para adicionar cupom. Cole FYZEN20 e receba 20% de desconto na primeira assinatura. Válido até 31 de janeiro de 2026.'
+                answer: 'Primeiro, crie sua conta grátis no Fyzen. Depois, acesse a seção "Seu Plano" (ou "Premium"), escolha PRO ou ULTRA, e clique em "Assinar PRO" (ou "Assinar ULTRA"). No checkout do Stripe, você verá um campo para adicionar cupom. Cole FYZEN20 e receba 20% de desconto na primeira assinatura. Válido até 31 de janeiro de 2026.'
                 },
               {
                 question: 'Os treinos funcionam em casa também?',
