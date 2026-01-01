@@ -209,7 +209,6 @@ const FacebookLandingPage = ({ onSelectScreen, user }) => {
             >
               Treinos 100% personalizados com IA, dieta adaptada e progresso garantido em 30 dias. 
               <br />
-              <span className="font-bold text-cyan-400">Aprovado por atletas profissionais.</span>
             </motion.p>
 
             {/* CTA Principal */}
@@ -243,10 +242,6 @@ const FacebookLandingPage = ({ onSelectScreen, user }) => {
                 <TrendingUp className="w-5 h-5 text-purple-400" />
                 <span>Média de 8kg perdidos</span>
               </div>
-             <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-pink-400" />
-                <span>Utilizado por atletas profissionais</span>
-             </div>
             </motion.div>
           </div>
 
