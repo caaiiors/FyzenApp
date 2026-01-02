@@ -207,7 +207,7 @@ const FacebookLandingPage = ({ onSelectScreen, user }) => {
               {...fadeInUp}
               transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
             >
-              Treinos 100% personalizados com IA, dieta adaptada e progresso garantido em 30 dias. 
+              Treinos 100% personalizados com Inteligência Artificial, dieta adaptada e progresso garantido em 30 dias. 
               <br />
             </motion.p>
 
